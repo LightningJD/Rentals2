@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>⚡ Lightning Fleet Dashboard</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+  :root{
+    --bg-0:#0f172a;
+    --bg-1:#1e293b;
+    --glass:rgba(255,255,255,0.05);
+    --glass-brd:rgba(255,255,255,0.1);
+    --blur:blur(12px);
+    --accent:#3b82f6;
+    --green:#22c55e;
+    --amber:#f59e0b;
+    --red:#ef4444;
+    --text:#f1f5f9;
+    --text-dim:#94a3b8;
+    --text-mute:#64748b;
+    --radius:16px;
+    --gap:12px;
+  }
+
+  html{font-size:16px;-webkit-text-size-adjust:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(160deg,var(--bg-0),var(--bg-1));
+    background-attachment:fixed;
+    color:var(--text);
+    min-height:100vh;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:40px;
+  }
+
+  .wrap{max-width:1100px;margin:0 auto;padding:16px}
+
+  /* ---------- Glass Panel ---------- */
+  .glass{
+    background:var(--glass);
+    backdrop-filter:var(--blur);
+    -webkit-backdrop-filter:var(--blur);
+    border:1px solid var(--glass-brd);
+    border-radius:var(--radius);
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    flex-wrap:wrap;gap:8px;
+    padding:18px 20px;margin-bottom:16px;
+  }
+  header h1{font-size:1.35rem;font-weight:700;letter-spacing:-0.02em}
+  header h1 .bolt{color:var(--accent)}
+  header .ts{font-size:.78rem;color:var(--text-mute);font-variant-numeric:tabular-nums}
+  header .badge{
+    font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;
+    padding:4px 10px;border-radius:99px;
+    background:rgba(59,130,246,.15);color:var(--accent);
+  }
+
+  /* ---------- Section Title ---------- */
+  .sec-title{
+    font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
+    color:var(--text-dim);margin:24px 4px 10px;
+  }
+
+  /* ---------- Grid Helpers ---------- */
+  .grid{display:grid;gap:var(--gap)}
+  .grid-2{grid-template-columns:1fr}
+  .grid-4{grid-template-columns:repeat(2,1fr)}
+  @media(min-width:560px){.grid-4{grid-template-columns:repeat(4,1fr)}}
+  @media(min-width:768px){.grid-2{grid-template-columns:repeat(2,1fr)}}
+
+  /* ---------- Earn Cards ---------- */
+  .earn-card{padding:18px 16px}
+  .earn-card .label{font-size:.72rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+  .earn-card .amt{font-size:1.6rem;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.02em}
+  .earn-card .sub{font-size:.72rem;color:var(--text-dim);margin-top:4px}
+  .earn-card.green .amt{color:var(--green)}
+  .earn-card.blue .amt{color:var(--accent)}
+  .earn-card.amber .amt{color:var(--amber)}
+
+  /* ---------- Fleet Cards ---------- */
+  .fleet-card{padding:16px;display:flex;flex-direction:column;gap:10px}
+  .fleet-card .top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+  .fleet-card .name{font-size:1.05rem;font-weight:600}
+  .fleet-card .name span{font-weight:400;color:var(--text-dim);font-size:.85rem}
+  .fleet-card .plate{
+    font-size:.72rem;font-weight:600;letter-spacing:.05em;
+    padding:3px 8px;border-radius:6px;
+    background:rgba(59,130,246,.12);color:#93c5fd;
+    font-family:'SF Mono',ui-monospace,monospace;
+  }
+  .fleet-card .detail{font-size:.8rem;color:var(--text-dim)}
+  .status-badge{
+    display:inline-flex;align-items:center;gap:4px;
+    font-size:.72rem;font-weight:600;padding:4px 10px;border-radius:99px;
+  }
+  .status-active{background:rgba(34,197,94,.12);color:var(--green)}
+  .status-warn{background:rgba(245,158,11,.12);color:var(--amber)}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+  .dot-green{background:var(--green);box-shadow:0 0 6px rgba(34,197,94,.5)}
+  .dot-amber{background:var(--amber);box-shadow:0 0 6px rgba(245,158,11,.5)}
+
+  /* ---------- Calendar ---------- */
+  .cal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px}
+  .cal-header h3{font-size:.95rem;font-weight:600}
+  .cal-header .avg{
+    font-size:.8rem;color:var(--text-dim);
+  }
+  .cal-header .avg b{color:var(--accent);font-weight:600}
+  .cal-scroll{
+    display:flex;gap:8px;overflow-x:auto;padding:4px 16px 16px;
+    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+  }
+  .cal-scroll::-webkit-scrollbar{height:4px}
+  .cal-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
+  .day-card{
+    flex:0 0 auto;min-width:62px;
+    padding:10px 8px;text-align:center;
+    scroll-snap-align:start;
+    border-radius:12px;
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.06);
+    transition:transform .15s ease,border-color .15s ease;
+  }
+  .day-card:active{transform:scale(.96)}
+  .day-card .dn{font-size:.68rem;color:var(--text-mute);text-transform:uppercase;font-weight:600}
+  .day-card .dt{font-size:.72rem;color:var(--text-dim);margin-top:1px}
+  .day-card .pr{font-size:.92rem;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums}
+  .day-card.weekend{
+    background:rgba(59,130,246,.07);
+    border-color:rgba(59,130,246,.18);
+  }
+  .day-card.weekend .dn{color:#93c5fd}
+  .day-card.today{
+    border-color:var(--accent);
+    box-shadow:0 0 0 1px var(--accent);
+  }
+  .day-card.today .dn{color:var(--accent)}
+
+  /* ---------- Performance ---------- */
+  .perf-card{padding:16px}
+  .perf-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .perf-row:last-child{margin-bottom:0}
+  .perf-row .pi{flex:0 0 120px}
+  .perf-row .pi .pl{font-size:.75rem;color:var(--text-dim);font-weight:500}
+  .perf-row .pi .pv{font-size:.85rem;font-weight:600;font-variant-numeric:tabular-nums}
+  .perf-bar{flex:1;height:8px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden;position:relative}
+  .perf-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+  .perf-fill.good{background:linear-gradient(90deg,#16a34a,var(--green))}
+  .perf-fill.warn{background:linear-gradient(90deg,#d97706,var(--amber))}
+  .perf-fill.bad{background:linear-gradient(90deg,#dc2626,var(--red))}
+  .perf-fill.track{background:linear-gradient(90deg,#2563eb,var(--accent))}
+  .perf-emoji{font-size:.9rem;flex:0 0 20px;text-align:center}
+  .goal-line{
+    position:absolute;top:-2px;bottom:-2px;width:2px;
+    background:rgba(255,255,255,.3);border-radius:1px;
+  }
+
+  /* ---------- Competitors ---------- */
+  .comp-card{padding:16px}
+  .comp-card .ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .comp-card .ch .mt{font-size:.95rem;font-weight:600}
+  .comp-card .ch .mc{font-size:.72rem;color:var(--text-mute)}
+  .comp-card .mc b{color:var(--text-dim)}
+  .comp-list{display:flex;flex-direction:column;gap:8px}
+  .comp-row{
+    display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;
+    padding:8px 10px;border-radius:10px;
+    background:rgba(255,255,255,.02);
+  }
+  .comp-row .yr{font-size:.75rem;color:var(--text-mute);font-weight:600;font-variant-numeric:tabular-nums}
+  .comp-row .info{font-size:.8rem;color:var(--text-dim)}
+  .comp-row .info .stars{color:var(--amber)}
+  .comp-row .price{font-size:.9rem;font-weight:700;font-variant-numeric:tabular-nums}
+  .comp-empty{font-size:.82rem;color:var(--text-mute);text-align:center;padding:12px}
+
+  /* ---------- Market Insights ---------- */
+  .insight-card{padding:18px 16px;display:flex;gap:14px;align-items:flex-start}
+  .insight-icon{
+    flex:0 0 40px;height:40px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.2rem;
+    background:rgba(245,158,11,.12);
+  }
+  .insight-body{flex:1}
+  .insight-body .it{font-size:.9rem;font-weight:600;margin-bottom:4px}
+  .insight-body .id{font-size:.8rem;color:var(--text-dim);line-height:1.45}
+  .insight-body .compare{
+    display:flex;gap:12px;margin-top:10px;flex-wrap:wrap;
+  }
+  .compare-pill{
+    font-size:.75rem;font-weight:600;padding:4px 12px;border-radius:99px;
+  }
+  .pill-you{background:rgba(59,130,246,.12);color:#93c5fd}
+  .pill-mkt{background:rgba(34,197,94,.12);color:#86efac}
+  .pill-gap{background:rgba(245,158,11,.12);color:#fcd34d}
+
+  /* ---------- Insurance ---------- */
+  .ins-card{padding:14px 16px}
+  .ins-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(min-width:560px){.ins-grid{grid-template-columns:repeat(5,1fr)}}
+  .ins-item .il{font-size:.68rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+  .ins-item .iv{font-size:.82rem;font-weight:500}
+
+  /* ---------- Loading ---------- */
+  .loader{
+    display:flex;align-items:center;justify-content:center;
+    min-height:60vh;color:var(--text-dim);font-size:.9rem;gap:8px;
+  }
+  .spinner{
+    width:20px;height:20px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.1);
+    border-top-color:var(--accent);
+    animation:spin .7s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .error-msg{
+    text-align:center;padding:40px 20px;color:var(--red);font-size:.9rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="loader"><div class="spinner"></div>Loading dashboard…</div>
+</div>
+
+<script>
+(async function(){
+  const app = document.getElementById('app');
+  let D;
+
+  try {
+    const r = await fetch('data.json', { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    D = await r.json();
+  } catch(e) {
+    app.innerHTML = '<div class="error-msg">⚠️ Failed to load data.json<br><small>' + e.message + '</small></div>';
+    return;
+  }
+
+  // ---------- Helpers ----------
+  const $ = s => document.createElement(s);
+  const fmt$ = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+  const fmtDate = iso => {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+           ' · ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  };
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  // ---------- Build UI ----------
+  let h = '';
+
+  // ===== Header =====
+  h += `<header class="glass">
+    <div>
+      <h1><span class="bolt">⚡</span> Lightning Fleet Dashboard</h1>
+      <div class="ts">Updated ${fmtDate(D.lastUpdated)}</div>
+    </div>
+    <div class="badge">${D.host.tier || 'Host'}</div>
+  </header>`;
+
+  // ===== Earnings =====
+  h += `<div class="sec-title">Earnings Overview</div><div class="grid grid-4">`;
+  const ec = [
+    { label: 'Total Earned', val: D.earnings.totalEarned, cls: 'green', sub: 'All time' },
+    { label: 'Upcoming', val: D.earnings.upcoming, cls: 'blue', sub: 'Next 30 days' },
+    { label: 'Reimbursements', val: D.earnings.reimbursements, cls: '', sub: 'Pending' },
+    { label: 'Incentives', val: D.earnings.incentives, cls: 'amber', sub: 'Earned' },
+  ];
+  ec.forEach(e => {
+    h += `<div class="earn-card glass ${e.cls}">
+      <div class="label">${e.label}</div>
+      <div class="amt">${fmt$(e.val)}</div>
+      <div class="sub">${e.sub}</div>
+    </div>`;
+  });
+  h += `</div>`;
+
+  // ===== Fleet Status =====
+  h += `<div class="sec-title">Fleet Status</div><div class="grid grid-2">`;
+  D.fleet.forEach(v => {
+    const active = v.status === 'Active';
+    h += `<div class="fleet-card glass">
+      <div class="top">
+        <div>
+          <div class="name">${v.make} ${v.model} <span>(${v.year})</span></div>
+          ${v.licensePlate ? `<div style="margin-top:6px"><span class="plate">${v.licensePlate}</span></div>` : ''}
+        </div>
+        <div class="status-badge ${active ? 'status-active' : 'status-warn'}">
+          <span class="dot ${active ? 'dot-green' : 'dot-amber'}"></span>${v.status}
+        </div>
+      </div>
+      <div class="detail">${v.details || ''}</div>
+    </div>`;
+  });
+  h += `</div>`;
+
+  // ===== Calendar Pricing =====
+  if (D.calendar && D.calendar.days) {
+    h += `<div class="sec-title">Calendar Pricing — Next 14 Days</div>`;
+    h += `<div class="glass" style="overflow:hidden">`;
+    h += `<div class="cal-header">
+      <h3>Daily Prices</h3>
+      <div class="avg">Avg <b>${fmt$(D.calendar.averagePrice)}/day</b></div>
+    </div>`;
+    h += `<div class="cal-scroll">`;
+    D.calendar.days.forEach(d => {
+      const isToday = d.date === todayStr;
+      h += `<div class="day-card ${d.weekend ? 'weekend' : ''} ${isToday ? 'today' : ''}">
+        <div class="dn">${d.day}</div>
+        <div class="dt">${d.date.slice(5).replace('-', '/')}</div>
+        <div class="pr">$${d.price}</div>
+      </div>`;
+    });
+    h += `</div></div>`;
+  }
+
+  // ===== Performance =====
+  if (D.performance) {
+    h += `<div class="sec-title">Performance Metrics</div>`;
+    h += `<div class="perf-card glass">`;
+    const p = D.performance;
+
+    // Helper: determine pass/fail
+    function perfBar(cfg) {
+      const isMax = cfg.goalType === 'max';
+      const pass = isMax ? cfg.value <= cfg.goal : cfg.value >= cfg.goal;
+      const tripsMode = cfg.unit === 'trips';
+      let pct, cls, emoji;
+      if (tripsMode) {
+        pct = Math.min(100, (cfg.value / cfg.goal) * 100);
+        cls = 'track';
+        emoji = '';
+      } else if (isMax) {
+        // For cancellation: 0% is perfect, goal is max allowed
+        pct = cfg.goal > 0 ? Math.max(0, 100 - (cfg.value / cfg.goal) * 100) : 100;
+        // Invert: show remaining as good
+        const ratio = cfg.value / cfg.goal;
+        cls = ratio <= 0.5 ? 'good' : ratio <= 1 ? 'warn' : 'bad';
+        emoji = pass ? '✅' : '⚠️';
+      } else {
+        pct = Math.min(100, (cfg.value / cfg.goal) * 100);
+        cls = pass ? 'good' : 'warn';
+        emoji = pass ? '✅' : '⚠️';
+      }
+      const goalPct = tripsMode ? 100 : (isMax ? 100 : (cfg.value >= cfg.goal ? 100 : (cfg.goal > 0 ? (cfg.goal / Math.max(cfg.value, cfg.goal)) * 100 : 100)));
+
+      const valDisplay = tripsMode ? `${cfg.value}/${cfg.goal}` : `${cfg.value}${cfg.unit || ''}`;
+      const goalDisplay = tripsMode ? `Goal: ${cfg.goal}` : `Goal: ${isMax ? '<' : '>'}${cfg.goal}${cfg.unit || ''}`;
+
+      return `<div class="perf-row">
+        <div class="pi">
+          <div class="pl">${tripsMode ? 'Completed Trips' : ''}</div>
+          <div class="pv">${valDisplay}</div>
+        </div>
+        <div class="perf-bar">
+          <div class="perf-fill ${cls}" style="width:${pct}%"></div>
+        </div>
+        <div class="perf-emoji">${emoji}</div>
+      </div>`;
+    }
+
+    // Cancel rate
+    if (p.cancellationRate) {
+      const c = p.cancellationRate;
+      const pass = c.value <= c.goal;
+      h += `<div class="perf-row">
+        <div class="pi"><div class="pl">Cancellation Rate</div><div class="pv">${c.value}${c.unit}</div></div>
+        <div class="perf-bar"><div class="perf-fill ${pass ? 'good' : 'bad'}" style="width:${c.goal > 0 ? Math.max(2, 100 - (c.value / c.goal) * 100) : 100}%"></div></div>
+        <div class="perf-emoji">${pass ? '✅' : '⚠️'}</div>
+      </div>`;
+    }
+    // 5-star
+    if (p.fiveStarRate) {
+      const c = p.fiveStarRate; const pass = c.value >= c.goal;
+      h += `<div class="perf-row">
+        <div class="pi"><div class="pl">5-Star Rate</div><div class="pv">${c.value}${c.unit}</div></div>
+        <div class="perf-bar"><div class="perf-fill ${pass ? 'good' : 'warn'}" style="width:${Math.min(100, (c.value / c.goal) * 100)}%"></div></div>
+        <div class="perf-emoji">${pass ? '✅' : '⚠️'}</div>
+      </div>`;
+    }
+    // Maintenance
+    if (p.maintenance) {
+      const c = p.maintenance; const pass = c.value >= c.goal;
+      h += `<div class="perf-row">
+        <div class="pi"><div class="pl">Maintenance</div><div class="pv">${c.value}${c.unit}</div></div>
+        <div class="perf-bar"><div class="perf-fill ${pass ? 'good' : 'warn'}" style="width:${Math.min(100, (c.value / c.goal) * 100)}%"></div></div>
+        <div class="perf-emoji">${pass ? '✅' : '⚠️'}</div>
+      </div>`;
+    }
+    // Cleanliness
+    if (p.cleanliness) {
+      const c = p.cleanliness; const pass = c.value >= c.goal;
+      h += `<div class="perf-row">
+        <div class="pi"><div class="pl">Cleanliness</div><div class="pv">${c.value}${c.unit}</div></div>
+        <div class="perf-bar"><div class="perf-fill ${pass ? 'good' : 'warn'}" style="width:${Math.min(100, (c.value / c.goal) * 100)}%"></div></div>
+        <div class="perf-emoji">${pass ? '✅' : '⚠️'}</div>
+      </div>`;
+    }
+    // Completed Trips
+    if (p.completedTrips) {
+      const c = p.completedTrips; const pct = Math.min(100, (c.value / c.goal) * 100);
+      h += `<div class="perf-row">
+        <div class="pi"><div class="pl">Completed Trips</div><div class="pv">${c.value}/${c.goal}</div></div>
+        <div class="perf-bar"><div class="perf-fill track" style="width:${pct}%"></div></div>
+        <div class="perf-emoji">🚗</div>
+      </div>`;
+    }
+    h += `</div>`;
+  }
+
+  // ===== Competitors =====
+  if (D.competitors) {
+    h += `<div class="sec-title">Competitor Pricing</div><div class="grid grid-2">`;
+    const ck = Object.keys(D.competitors);
+    ck.forEach(k => {
+      const c = D.competitors[k];
+      h += `<div class="comp-card glass">`;
+      h += `<div class="ch"><div class="mt">${c.model}</div><div class="mc"><b>${c.count}</b> listings · ${c.market}</div></div>`;
+      if (c.count > 0 && c.listings.length) {
+        h += `<div style="font-size:.75rem;color:var(--text-mute);margin-bottom:8px">Avg <b style="color:var(--text-dim)">$${c.averagePrice}/day</b></div>`;
+        h += `<div class="comp-list">`;
+        c.listings.forEach(l => {
+          h += `<div class="comp-row">
+            <div class="yr">${l.year}</div>
+            <div class="info"><span class="stars">★ ${l.rating}</span> · ${l.trips} trips</div>
+            <div class="price">$${l.price}<span style="font-size:.68rem;color:var(--text-mute);font-weight:400">/day</span></div>
+          </div>`;
+        });
+        h += `</div>`;
+      } else {
+        h += `<div class="comp-empty">🔍 No competing listings found</div>`;
+      }
+      h += `</div>`;
+    });
+    h += `</div>`;
+  }
+
+  // ===== Market Insights =====
+  if (D.marketInsights) {
+    const m = D.marketInsights;
+    h += `<div class="sec-title">Market Insights</div>`;
+    h += `<div class="insight-card glass">
+      <div class="insight-icon">📈</div>
+      <div class="insight-body">
+        <div class="it">Pricing Opportunity Detected</div>
+        <div class="id">${m.alert}</div>
+        <div class="compare">
+          <span class="compare-pill pill-you">Your avg: ${fmt$(m.yourAverage)}/day</span>
+          <span class="compare-pill pill-mkt">Market avg: ${fmt$(m.marketAverage)}/day</span>
+          <span class="compare-pill pill-gap">Gap: ~${m.underpricingPercent}%</span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ===== Insurance =====
+  if (D.insurance) {
+    const i = D.insurance;
+    h += `<div class="sec-title">Insurance</div>`;
+    h += `<div class="ins-card glass"><div class="ins-grid">`;
+    h += `<div class="ins-item"><div class="il">Provider</div><div class="iv">${i.provider}</div></div>`;
+    h += `<div class="ins-item"><div class="il">Monthly Cost</div><div class="iv">${fmt$(i.monthlyCost)}</div></div>`;
+    h += `<div class="ins-item"><div class="il">Coverage</div><div class="iv">${i.coverage}</div></div>`;
+    h += `<div class="ins-item"><div class="il">Policy Start</div><div class="iv">${new Date(i.policyStart).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div></div>`;
+    h += `<div class="ins-item"><div class="il">Policy End</div><div class="iv">${new Date(i.policyEnd).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div></div>`;
+    h += `</div></div>`;
+  }
+
+  app.innerHTML = h;
+})();
+</script>
+</body>
+</html>

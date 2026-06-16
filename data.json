@@ -1,0 +1,110 @@
+{
+  "lastUpdated": "2026-06-16T10:07:00-07:00",
+  "host": {
+    "name": "RUELLE LLC",
+    "tier": "Standard Host"
+  },
+  "fleet": [
+    {
+      "id": "phl46",
+      "make": "Tesla",
+      "model": "Model 3",
+      "year": 2018,
+      "licensePlate": "PHL46",
+      "status": "Active",
+      "details": "Long Range Battery",
+      "listingComplete": true
+    },
+    {
+      "id": "santa-fe",
+      "make": "Hyundai",
+      "model": "Santa Fe",
+      "year": 2022,
+      "licensePlate": "",
+      "status": "Listing Incomplete",
+      "details": "Needs photos & listing completion",
+      "listingComplete": false
+    }
+  ],
+  "earnings": {
+    "totalEarned": 736.39,
+    "upcoming": 1098,
+    "reimbursements": 90,
+    "incentives": 100,
+    "missedEarnings": 0,
+    "currency": "USD"
+  },
+  "performance": {
+    "cancellationRate": { "value": 0, "goal": 3, "goalType": "max", "unit": "%" },
+    "fiveStarRate": { "value": 100, "goal": 85, "goalType": "min", "unit": "%" },
+    "maintenance": { "value": 100, "goal": 80, "goalType": "min", "unit": "%" },
+    "cleanliness": { "value": 100, "goal": 80, "goalType": "min", "unit": "%" },
+    "completedTrips": { "value": 3, "goal": 20, "goalType": "min", "unit": "trips" }
+  },
+  "calendar": {
+    "averagePrice": 55,
+    "days": [
+      { "date": "2026-06-16", "day": "Tue", "price": 52 },
+      { "date": "2026-06-17", "day": "Wed", "price": 53 },
+      { "date": "2026-06-18", "day": "Thu", "price": 56 },
+      { "date": "2026-06-19", "day": "Fri", "price": 55 },
+      { "date": "2026-06-20", "day": "Sat", "price": 57, "weekend": true },
+      { "date": "2026-06-21", "day": "Sun", "price": 54, "weekend": true },
+      { "date": "2026-06-22", "day": "Mon", "price": 55 },
+      { "date": "2026-06-23", "day": "Tue", "price": 55 },
+      { "date": "2026-06-24", "day": "Wed", "price": 55 },
+      { "date": "2026-06-25", "day": "Thu", "price": 59 },
+      { "date": "2026-06-26", "day": "Fri", "price": 56 },
+      { "date": "2026-06-27", "day": "Sat", "price": 58, "weekend": true },
+      { "date": "2026-06-28", "day": "Sun", "price": 54, "weekend": true },
+      { "date": "2026-06-29", "day": "Mon", "price": 55 },
+      { "date": "2026-06-30", "day": "Tue", "price": 53 },
+      { "date": "2026-07-01", "day": "Wed", "price": 54 },
+      { "date": "2026-07-02", "day": "Thu", "price": 57 }
+    ]
+  },
+  "trips": [
+    {
+      "id": "57653635",
+      "guest": "Krista",
+      "vehicle": "Tesla Model 3 (2018)",
+      "endDate": "2026-07-15",
+      "endTime": "12:00 PM",
+      "location": "3960 Sagewood Street, Las Vegas, NV 89147",
+      "status": "Booked"
+    }
+  ],
+  "competitors": {
+    "teslaModel3": {
+      "model": "Tesla Model 3",
+      "market": "Las Vegas, NV",
+      "count": 2,
+      "averagePrice": 70,
+      "listings": [
+        { "year": 2023, "rating": 4.9, "trips": 98, "price": 73, "distance": "4.9 mi", "allStar": true },
+        { "year": 2018, "rating": 5.0, "trips": 3, "price": 67, "distance": "7.3 mi", "allStar": false }
+      ]
+    },
+    "hyundaiSantaFe": {
+      "model": "Hyundai Santa Fe",
+      "market": "Las Vegas, NV",
+      "count": 0,
+      "averagePrice": 0,
+      "listings": [],
+      "note": "No listings found — first-mover advantage"
+    }
+  },
+  "marketInsights": {
+    "yourAverage": 55,
+    "marketAverage": 70,
+    "underpricingPercent": 21,
+    "alert": "Your avg $55/day vs market $70/day — you may be underpricing by ~21%"
+  },
+  "insurance": {
+    "provider": "ABI (American Business Insurance)",
+    "monthlyCost": 159,
+    "coverage": "Period X™ Commercial Carshare",
+    "policyStart": "2026-06-15",
+    "policyEnd": "2027-06-15"
+  }
+}
