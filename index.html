@@ -2,480 +2,539 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>⚡ Lightning Fleet Dashboard</title>
 <style>
-  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root {
+  --bg-1: #0a0e1a;
+  --bg-2: #0f1420;
+  --glass: rgba(255,255,255,0.05);
+  --glass-2: rgba(255,255,255,0.08);
+  --glass-border: rgba(255,255,255,0.12);
+  --text: #e8eef5;
+  --text-dim: #8a96a8;
+  --text-bright: #ffffff;
+  --green: #00e676;
+  --green-bg: rgba(0,230,118,0.1);
+  --red: #ff5252;
+  --red-bg: rgba(255,82,82,0.1);
+  --amber: #ffb74d;
+  --amber-bg: rgba(255,183,77,0.1);
+  --blue: #448aff;
+  --blue-bg: rgba(68,138,255,0.1);
+  --purple: #b388ff;
+  --purple-bg: rgba(179,136,255,0.1);
+  --radius: 14px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-1);
+  background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%);
+  background-attachment: fixed;
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 100%; padding: 12px; }
+@media(min-width:640px) { .container { max-width: 720px; margin: 0 auto; padding: 16px; } }
+@media(min-width:1000px) { .container { max-width: 960px; } }
 
-  :root{
-    --bg-0:#0f172a;
-    --bg-1:#1e293b;
-    --glass:rgba(255,255,255,0.05);
-    --glass-brd:rgba(255,255,255,0.1);
-    --blur:blur(12px);
-    --accent:#3b82f6;
-    --green:#22c55e;
-    --amber:#f59e0b;
-    --red:#ef4444;
-    --text:#f1f5f9;
-    --text-dim:#94a3b8;
-    --text-mute:#64748b;
-    --radius:16px;
-    --gap:12px;
-  }
+/* Header */
+.header {
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.header h1 { font-size: 1.45rem; font-weight: 700; color: var(--text-bright); letter-spacing: -0.5px; }
+.header .subtitle { font-size: 0.78rem; color: var(--text-dim); margin-top: 4px; }
+.header .host-badge {
+  display: inline-block; margin-top: 8px; padding: 3px 10px;
+  background: var(--glass-2); border: 1px solid var(--glass-border);
+  border-radius: 20px; font-size: 0.72rem; color: var(--text-dim);
+}
 
-  html{font-size:16px;-webkit-text-size-adjust:100%}
-  body{
-    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
-    background:linear-gradient(160deg,var(--bg-0),var(--bg-1));
-    background-attachment:fixed;
-    color:var(--text);
-    min-height:100vh;
-    line-height:1.5;
-    -webkit-font-smoothing:antialiased;
-    padding-bottom:40px;
-  }
+/* Cards */
+.card {
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.card-title {
+  font-size: 0.82rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--text-dim); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
 
-  .wrap{max-width:1100px;margin:0 auto;padding:16px}
+/* Grid */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.grid-4 { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+@media(min-width:640px) { .grid-4 { grid-template-columns: repeat(4,1fr); } }
 
-  /* ---------- Glass Panel ---------- */
-  .glass{
-    background:var(--glass);
-    backdrop-filter:var(--blur);
-    -webkit-backdrop-filter:var(--blur);
-    border:1px solid var(--glass-brd);
-    border-radius:var(--radius);
-  }
+/* Stat cards */
+.stat { text-align: center; }
+.stat .label { font-size: 0.68rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.4px; }
+.stat .value { font-size: 1.3rem; font-weight: 700; color: var(--text-bright); margin-top: 2px; }
+.stat .value.green { color: var(--green); }
+.stat .value.red { color: var(--red); }
+.stat .value.amber { color: var(--amber); }
+.stat .sub { font-size: 0.7rem; color: var(--text-dim); margin-top: 2px; }
 
-  /* ---------- Header ---------- */
-  header{
-    display:flex;align-items:center;justify-content:space-between;
-    flex-wrap:wrap;gap:8px;
-    padding:18px 20px;margin-bottom:16px;
-  }
-  header h1{font-size:1.35rem;font-weight:700;letter-spacing:-0.02em}
-  header h1 .bolt{color:var(--accent)}
-  header .ts{font-size:.78rem;color:var(--text-mute);font-variant-numeric:tabular-nums}
-  header .badge{
-    font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;
-    padding:4px 10px;border-radius:99px;
-    background:rgba(59,130,246,.15);color:var(--accent);
-  }
+/* Fleet status */
+.fleet-card {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--glass-2); border-radius: 10px; padding: 12px;
+}
+.fleet-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink:0; }
+.fleet-icon.active { background: var(--green-bg); }
+.fleet-icon.inactive { background: var(--amber-bg); }
+.fleet-info { flex: 1; min-width: 0; }
+.fleet-info .name { font-size: 0.88rem; font-weight: 600; color: var(--text-bright); }
+.fleet-info .detail { font-size: 0.74rem; color: var(--text-dim); }
+.status-pill {
+  font-size: 0.65rem; padding: 2px 8px; border-radius: 20px;
+  font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap;
+}
+.status-pill.active { background: var(--green-bg); color: var(--green); }
+.status-pill.inactive { background: var(--amber-bg); color: var(--amber); }
 
-  /* ---------- Section Title ---------- */
-  .sec-title{
-    font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
-    color:var(--text-dim);margin:24px 4px 10px;
-  }
+/* Calendar */
+.cal-scroll {
+  display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+}
+.cal-day {
+  flex-shrink: 0; width: 58px; background: var(--glass-2); border-radius: 10px;
+  padding: 8px 4px; text-align: center; border: 1px solid transparent;
+}
+.cal-day.weekend { border-color: rgba(255,183,77,0.3); background: var(--amber-bg); }
+.cal-day .dow { font-size: 0.62rem; color: var(--text-dim); text-transform: uppercase; }
+.cal-day .date { font-size: 0.72rem; color: var(--text); margin: 2px 0; }
+.cal-day .price { font-size: 0.88rem; font-weight: 700; color: var(--text-bright); }
+.cal-day.weekend .price { color: var(--amber); }
 
-  /* ---------- Grid Helpers ---------- */
-  .grid{display:grid;gap:var(--gap)}
-  .grid-2{grid-template-columns:1fr}
-  .grid-4{grid-template-columns:repeat(2,1fr)}
-  @media(min-width:560px){.grid-4{grid-template-columns:repeat(4,1fr)}}
-  @media(min-width:768px){.grid-2{grid-template-columns:repeat(2,1fr)}}
+/* Performance bars */
+.perf-row { margin-bottom: 10px; }
+.perf-row:last-child { margin-bottom: 0; }
+.perf-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.perf-header .name { font-size: 0.8rem; color: var(--text); }
+.perf-header .val { font-size: 0.8rem; font-weight: 600; }
+.perf-bar { height: 6px; background: var(--glass-2); border-radius: 3px; overflow: hidden; }
+.perf-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
 
-  /* ---------- Earn Cards ---------- */
-  .earn-card{padding:18px 16px}
-  .earn-card .label{font-size:.72rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
-  .earn-card .amt{font-size:1.6rem;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.02em}
-  .earn-card .sub{font-size:.72rem;color:var(--text-dim);margin-top:4px}
-  .earn-card.green .amt{color:var(--green)}
-  .earn-card.blue .amt{color:var(--accent)}
-  .earn-card.amber .amt{color:var(--amber)}
+/* Profit Calculator */
+.profit-line {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 0.85rem;
+}
+.profit-line:last-of-type { border-bottom: none; }
+.profit-line .label { color: var(--text-dim); }
+.profit-line .amount { font-weight: 600; }
+.profit-line .amount.pos { color: var(--green); }
+.profit-line .amount.neg { color: var(--red); }
+.profit-total {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 10px; padding: 14px; border-radius: 10px; text-align: center;
+}
+.profit-total.pos { background: var(--green-bg); border: 1px solid rgba(0,230,118,0.2); }
+.profit-total.neg { background: var(--red-bg); border: 1px solid rgba(255,82,82,0.2); }
+.profit-total .label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing:0.5px; }
+.profit-total .amount { font-size: 1.6rem; font-weight: 800; }
+.profit-total.pos .amount { color: var(--green); }
+.profit-total.neg .amount { color: var(--red); }
 
-  /* ---------- Fleet Cards ---------- */
-  .fleet-card{padding:16px;display:flex;flex-direction:column;gap:10px}
-  .fleet-card .top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
-  .fleet-card .name{font-size:1.05rem;font-weight:600}
-  .fleet-card .name span{font-weight:400;color:var(--text-dim);font-size:.85rem}
-  .fleet-card .plate{
-    font-size:.72rem;font-weight:600;letter-spacing:.05em;
-    padding:3px 8px;border-radius:6px;
-    background:rgba(59,130,246,.12);color:#93c5fd;
-    font-family:'SF Mono',ui-monospace,monospace;
-  }
-  .fleet-card .detail{font-size:.8rem;color:var(--text-dim)}
-  .status-badge{
-    display:inline-flex;align-items:center;gap:4px;
-    font-size:.72rem;font-weight:600;padding:4px 10px;border-radius:99px;
-  }
-  .status-active{background:rgba(34,197,94,.12);color:var(--green)}
-  .status-warn{background:rgba(245,158,11,.12);color:var(--amber)}
-  .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
-  .dot-green{background:var(--green);box-shadow:0 0 6px rgba(34,197,94,.5)}
-  .dot-amber{background:var(--amber);box-shadow:0 0 6px rgba(245,158,11,.5)}
+/* Utilization Ring */
+.util-ring-wrap { display: flex; align-items: center; gap: 20px; }
+.util-ring {
+  width: 100px; height: 100px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: conic-gradient(var(--red) 0% 16%, var(--glass-2) 16% 100%);
+}
+.util-ring-inner {
+  width: 78px; height: 78px; border-radius: 50%;
+  background: var(--bg-1); display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.util-ring-inner .pct { font-size: 1.5rem; font-weight: 800; color: var(--red); }
+.util-ring-inner .lbl { font-size: 0.55rem; color: var(--text-dim); text-transform: uppercase; }
+.util-info { flex: 1; }
+.util-info .badge {
+  display: inline-block; padding: 2px 8px; border-radius: 20px;
+  font-size: 0.68rem; font-weight: 600; background: var(--red-bg); color: var(--red);
+  margin-bottom: 6px;
+}
+.util-info p { font-size: 0.78rem; color: var(--text-dim); line-height: 1.5; }
+.util-info .potential {
+  margin-top: 8px; padding: 8px 10px; border-radius: 8px;
+  background: var(--green-bg); border: 1px solid rgba(0,230,118,0.15);
+  font-size: 0.78rem; color: var(--green); font-weight: 600;
+}
 
-  /* ---------- Calendar ---------- */
-  .cal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px}
-  .cal-header h3{font-size:.95rem;font-weight:600}
-  .cal-header .avg{
-    font-size:.8rem;color:var(--text-dim);
-  }
-  .cal-header .avg b{color:var(--accent);font-weight:600}
-  .cal-scroll{
-    display:flex;gap:8px;overflow-x:auto;padding:4px 16px 16px;
-    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
-  }
-  .cal-scroll::-webkit-scrollbar{height:4px}
-  .cal-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
-  .day-card{
-    flex:0 0 auto;min-width:62px;
-    padding:10px 8px;text-align:center;
-    scroll-snap-align:start;
-    border-radius:12px;
-    background:rgba(255,255,255,.03);
-    border:1px solid rgba(255,255,255,.06);
-    transition:transform .15s ease,border-color .15s ease;
-  }
-  .day-card:active{transform:scale(.96)}
-  .day-card .dn{font-size:.68rem;color:var(--text-mute);text-transform:uppercase;font-weight:600}
-  .day-card .dt{font-size:.72rem;color:var(--text-dim);margin-top:1px}
-  .day-card .pr{font-size:.92rem;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums}
-  .day-card.weekend{
-    background:rgba(59,130,246,.07);
-    border-color:rgba(59,130,246,.18);
-  }
-  .day-card.weekend .dn{color:#93c5fd}
-  .day-card.today{
-    border-color:var(--accent);
-    box-shadow:0 0 0 1px var(--accent);
-  }
-  .day-card.today .dn{color:var(--accent)}
+/* Action Items */
+.action-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px; border-radius: 10px; background: var(--glass-2); margin-bottom: 6px;
+}
+.action-item:last-child { margin-bottom: 0; }
+.action-item .badge {
+  flex-shrink: 0; font-size: 0.6rem; padding: 3px 7px; border-radius: 20px;
+  font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; min-width: 52px; text-align: center;
+}
+.badge.high { background: var(--red-bg); color: var(--red); }
+.badge.medium { background: var(--amber-bg); color: var(--amber); }
+.badge.low { background: var(--blue-bg); color: var(--blue); }
+.action-item .text { flex: 1; font-size: 0.8rem; color: var(--text); line-height: 1.4; }
+.action-item .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.status-dot.pending { background: var(--text-dim); }
+.status-dot.in_progress { background: var(--blue); animation: pulse 1.8s infinite; }
+@keyframes pulse { 0%,100% { opacity:1; box-shadow:0 0 0 0 rgba(68,138,255,0.4); } 50% { opacity:0.6; box-shadow:0 0 0 4px rgba(68,138,255,0); } }
 
-  /* ---------- Performance ---------- */
-  .perf-card{padding:16px}
-  .perf-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-  .perf-row:last-child{margin-bottom:0}
-  .perf-row .pi{flex:0 0 120px}
-  .perf-row .pi .pl{font-size:.75rem;color:var(--text-dim);font-weight:500}
-  .perf-row .pi .pv{font-size:.85rem;font-weight:600;font-variant-numeric:tabular-nums}
-  .perf-bar{flex:1;height:8px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden;position:relative}
-  .perf-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1)}
-  .perf-fill.good{background:linear-gradient(90deg,#16a34a,var(--green))}
-  .perf-fill.warn{background:linear-gradient(90deg,#d97706,var(--amber))}
-  .perf-fill.bad{background:linear-gradient(90deg,#dc2626,var(--red))}
-  .perf-fill.track{background:linear-gradient(90deg,#2563eb,var(--accent))}
-  .perf-emoji{font-size:.9rem;flex:0 0 20px;text-align:center}
-  .goal-line{
-    position:absolute;top:-2px;bottom:-2px;width:2px;
-    background:rgba(255,255,255,.3);border-radius:1px;
-  }
+/* Market Data */
+.market-header { font-size: 0.95rem; font-weight: 700; color: var(--text-bright); margin-bottom: 2px; }
+.market-sub { font-size: 0.72rem; color: var(--text-dim); margin-bottom: 12px; }
+.market-summary { display: grid; grid-template-columns: repeat(2,1fr); gap: 6px; margin-bottom: 12px; }
+@media(min-width:560px) { .market-summary { grid-template-columns: repeat(4,1fr); } }
+.market-stat {
+  background: var(--glass-2); border-radius: 8px; padding: 8px; text-align: center;
+}
+.market-stat .lbl { font-size: 0.62rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.3px; }
+.market-stat .val { font-size: 1.05rem; font-weight: 700; color: var(--text-bright); margin-top: 2px; }
 
-  /* ---------- Competitors ---------- */
-  .comp-card{padding:16px}
-  .comp-card .ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-  .comp-card .ch .mt{font-size:.95rem;font-weight:600}
-  .comp-card .ch .mc{font-size:.72rem;color:var(--text-mute)}
-  .comp-card .mc b{color:var(--text-dim)}
-  .comp-list{display:flex;flex-direction:column;gap:8px}
-  .comp-row{
-    display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;
-    padding:8px 10px;border-radius:10px;
-    background:rgba(255,255,255,.02);
-  }
-  .comp-row .yr{font-size:.75rem;color:var(--text-mute);font-weight:600;font-variant-numeric:tabular-nums}
-  .comp-row .info{font-size:.8rem;color:var(--text-dim)}
-  .comp-row .info .stars{color:var(--amber)}
-  .comp-row .price{font-size:.9rem;font-weight:700;font-variant-numeric:tabular-nums}
-  .comp-empty{font-size:.82rem;color:var(--text-mute);text-align:center;padding:12px}
+/* Competitor table */
+.comp-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; }
+.comp-table { width: 100%; border-collapse: collapse; font-size: 0.74rem; min-width: 500px; }
+.comp-table th {
+  text-align: left; padding: 7px 6px; color: var(--text-dim);
+  font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.4px;
+  border-bottom: 1px solid var(--glass-border); white-space: nowrap;
+}
+.comp-table td { padding: 7px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); white-space: nowrap; }
+.comp-table tr.high-util { background: rgba(0,230,118,0.05); }
+.comp-table tr.you-row { background: rgba(68,138,255,0.08); border-left: 3px solid var(--blue); }
+.all-star { display: inline-block; font-size: 0.58rem; padding: 1px 5px; border-radius: 10px; background: var(--purple-bg); color: var(--purple); font-weight: 600; margin-left: 3px; }
+.util-tag { font-size: 0.6rem; padding: 1px 5px; border-radius: 8px; font-weight: 600; }
+.util-tag.high { color: var(--green); }
+.util-tag.medium { color: var(--amber); }
+.util-tag.low { color: var(--text-dim); }
 
-  /* ---------- Market Insights ---------- */
-  .insight-card{padding:18px 16px;display:flex;gap:14px;align-items:flex-start}
-  .insight-icon{
-    flex:0 0 40px;height:40px;border-radius:12px;
-    display:flex;align-items:center;justify-content:center;
-    font-size:1.2rem;
-    background:rgba(245,158,11,.12);
-  }
-  .insight-body{flex:1}
-  .insight-body .it{font-size:.9rem;font-weight:600;margin-bottom:4px}
-  .insight-body .id{font-size:.8rem;color:var(--text-dim);line-height:1.45}
-  .insight-body .compare{
-    display:flex;gap:12px;margin-top:10px;flex-wrap:wrap;
-  }
-  .compare-pill{
-    font-size:.75rem;font-weight:600;padding:4px 12px;border-radius:99px;
-  }
-  .pill-you{background:rgba(59,130,246,.12);color:#93c5fd}
-  .pill-mkt{background:rgba(34,197,94,.12);color:#86efac}
-  .pill-gap{background:rgba(245,158,11,.12);color:#fcd34d}
+/* Price comparison callout */
+.price-callout { display: flex; gap: 8px; margin-top: 12px; }
+.price-comp-box {
+  flex: 1; border-radius: 10px; padding: 10px; text-align: center;
+}
+.price-comp-box.at-market { background: var(--glass-2); border: 1px solid var(--glass-border); }
+.price-comp-box.below { background: var(--red-bg); border: 1px solid rgba(255,82,82,0.15); }
+.price-comp-box .title { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; }
+.price-comp-box .row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px; font-size: 0.76rem; }
+.price-comp-box .row .you { color: var(--text-bright); font-weight: 600; }
+.price-comp-box .row .area { color: var(--text-dim); }
+.price-comp-box .gap { font-size: 0.68rem; margin-top: 4px; }
+.price-comp-box.below .gap { color: var(--red); }
+.price-comp-box.at-market .gap { color: var(--green); }
 
-  /* ---------- Insurance ---------- */
-  .ins-card{padding:14px 16px}
-  .ins-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-  @media(min-width:560px){.ins-grid{grid-template-columns:repeat(5,1fr)}}
-  .ins-item .il{font-size:.68rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
-  .ins-item .iv{font-size:.82rem;font-weight:500}
+/* Santa Fe alert */
+.santa-fe-alert {
+  background: var(--green-bg); border: 1px solid rgba(0,230,118,0.2);
+  border-radius: 10px; padding: 14px; text-align: center; margin-top: 12px;
+}
+.santa-fe-alert .big { font-size: 1rem; font-weight: 700; color: var(--green); }
+.santa-fe-alert .sub { font-size: 0.78rem; color: var(--text); margin-top: 4px; }
 
-  /* ---------- Loading ---------- */
-  .loader{
-    display:flex;align-items:center;justify-content:center;
-    min-height:60vh;color:var(--text-dim);font-size:.9rem;gap:8px;
-  }
-  .spinner{
-    width:20px;height:20px;border-radius:50%;
-    border:2px solid rgba(255,255,255,.1);
-    border-top-color:var(--accent);
-    animation:spin .7s linear infinite;
-  }
-  @keyframes spin{to{transform:rotate(360deg)}}
+/* History */
+.history-note { font-size: 0.8rem; color: var(--text-dim); text-align: center; padding: 16px 0; }
+.history-chart { display: none; }
 
-  .error-msg{
-    text-align:center;padding:40px 20px;color:var(--red);font-size:.9rem;
-  }
+/* Footer */
+.footer { text-align: center; padding: 16px; }
+.footer .ins { font-size: 0.76rem; color: var(--text); font-weight: 600; }
+.footer .ins-detail { font-size: 0.7rem; color: var(--text-dim); margin-top: 4px; }
+.footer .updated { font-size: 0.65rem; color: var(--text-dim); margin-top: 10px; }
+
+/* Loading */
+.loading {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 80vh; font-size: 1.1rem; color: var(--text-dim);
+}
 </style>
 </head>
 <body>
-<div class="wrap" id="app">
-  <div class="loader"><div class="spinner"></div>Loading dashboard…</div>
-</div>
+<div id="app" class="loading">Loading dashboard…</div>
 
 <script>
-(async function(){
-  const app = document.getElementById('app');
-  let D;
-
+(async () => {
   try {
-    const r = await fetch('data.json', { cache: 'no-store' });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    D = await r.json();
-  } catch(e) {
-    app.innerHTML = '<div class="error-msg">⚠️ Failed to load data.json<br><small>' + e.message + '</small></div>';
-    return;
-  }
+    const res = await fetch('data.json');
+    const D = await res.json();
+    const $ = id => document.getElementById(id);
+    const fmt = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmt0 = n => '$' + Math.round(n).toLocaleString('en-US');
 
-  // ---------- Helpers ----------
-  const $ = s => document.createElement(s);
-  const fmt$ = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
-  const fmtDate = iso => {
-    const d = new Date(iso);
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
-           ' · ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-  };
-  const todayStr = new Date().toISOString().slice(0, 10);
+    const updated = new Date(D.lastUpdated);
+    const updatedStr = updated.toLocaleString('en-US', { weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
 
-  // ---------- Build UI ----------
-  let h = '';
+    // ---- Profit calc ----
+    const trips = D.performance.completedTrips.value;
+    const gross = D.earnings.totalEarned;
+    const turoFee = gross * (D.earnings.estimatedTuroFeePercent / 100);
+    const insurance = D.earnings.insuranceMonthly / D.insurance.vehiclesCovered;
+    const charging = D.earnings.estimatedChargingPerTrip * trips;
+    const cleaning = D.earnings.estimatedCleaningPerTrip * trips;
+    const netProfit = gross - turoFee - insurance - charging - cleaning;
 
-  // ===== Header =====
-  h += `<header class="glass">
-    <div>
-      <h1><span class="bolt">⚡</span> Lightning Fleet Dashboard</h1>
-      <div class="ts">Updated ${fmtDate(D.lastUpdated)}</div>
-    </div>
-    <div class="badge">${D.host.tier || 'Host'}</div>
-  </header>`;
+    // ---- Competitor rows ----
+    const compRows = (D.marketData.competitors || []).map(c => {
+      const isYou = c.year === 2018 && c.trim === 'Long Range Battery' && c.distance === '6.91 mi' && c.allStar;
+      return { ...c, isYou };
+    });
 
-  // ===== Earnings =====
-  h += `<div class="sec-title">Earnings Overview</div><div class="grid grid-4">`;
-  const ec = [
-    { label: 'Total Earned', val: D.earnings.totalEarned, cls: 'green', sub: 'All time' },
-    { label: 'Upcoming', val: D.earnings.upcoming, cls: 'blue', sub: 'Next 30 days' },
-    { label: 'Reimbursements', val: D.earnings.reimbursements, cls: '', sub: 'Pending' },
-    { label: 'Incentives', val: D.earnings.incentives, cls: 'amber', sub: 'Earned' },
-  ];
-  ec.forEach(e => {
-    h += `<div class="earn-card glass ${e.cls}">
-      <div class="label">${e.label}</div>
-      <div class="amt">${fmt$(e.val)}</div>
-      <div class="sub">${e.sub}</div>
-    </div>`;
-  });
-  h += `</div>`;
+    // Sort: your row first, then high util, then others
+    compRows.sort((a, b) => {
+      if (a.isYou) return -1;
+      if (b.isYou) return 1;
+      const ord = { High: 0, Medium: 1, Low: 2 };
+      return (ord[a.utilization] ?? 3) - (ord[b.utilization] ?? 3);
+    });
 
-  // ===== Fleet Status =====
-  h += `<div class="sec-title">Fleet Status</div><div class="grid grid-2">`;
-  D.fleet.forEach(v => {
-    const active = v.status === 'Active';
-    h += `<div class="fleet-card glass">
-      <div class="top">
-        <div>
-          <div class="name">${v.make} ${v.model} <span>(${v.year})</span></div>
-          ${v.licensePlate ? `<div style="margin-top:6px"><span class="plate">${v.licensePlate}</span></div>` : ''}
+    // ---- Action items sort ----
+    const priorityOrder = { high: 0, medium: 1, low: 2 };
+    const actions = [...(D.actionItems || [])].sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+
+    // ---- Build HTML ----
+    let h = '<div class="container">';
+
+    // Header
+    h += `
+      <div class="header">
+        <h1>⚡ Lightning Fleet Dashboard</h1>
+        <div class="subtitle">Updated ${updatedStr}</div>
+        <div class="host-badge">${D.host.name} · ${D.host.tier}</div>
+      </div>`;
+
+    // Earnings Overview
+    h += `
+      <div class="card">
+        <div class="card-title">💰 Earnings Overview</div>
+        <div class="grid-4">
+          <div class="stat"><div class="label">Total Earned</div><div class="value green">${fmt(D.earnings.totalEarned)}</div></div>
+          <div class="stat"><div class="label">Upcoming</div><div class="value">${fmt(D.earnings.upcoming)}</div></div>
+          <div class="stat"><div class="label">Reimbursements</div><div class="value">${fmt(D.earnings.reimbursements)}</div></div>
+          <div class="stat"><div class="label">Incentives</div><div class="value">${fmt(D.earnings.incentives)}</div></div>
         </div>
-        <div class="status-badge ${active ? 'status-active' : 'status-warn'}">
-          <span class="dot ${active ? 'dot-green' : 'dot-amber'}"></span>${v.status}
+      </div>`;
+
+    // Fleet Status
+    h += `<div class="card"><div class="card-title">🚗 Fleet Status</div>`;
+    (D.fleet || []).forEach(v => {
+      const active = v.status === 'Active';
+      h += `
+        <div class="fleet-card" style="margin-bottom:8px;">
+          <div class="fleet-icon ${active ? 'active' : 'inactive'}">${active ? '🟢' : '🟡'}</div>
+          <div class="fleet-info">
+            <div class="name">${v.year} ${v.make} ${v.model}</div>
+            <div class="detail">${v.details}${v.licensePlate ? ' · ' + v.licensePlate : ''}</div>
+          </div>
+          <div class="status-pill ${active ? 'active' : 'inactive'}">${v.status}</div>
+        </div>`;
+    });
+    h += `</div>`;
+
+    // Profit Calculator
+    const netClass = netProfit >= 0 ? 'pos' : 'neg';
+    h += `
+      <div class="card">
+        <div class="card-title">🧮 Profit Calculator — Tesla Model 3</div>
+        <div class="profit-line"><span class="label">Gross Earnings</span><span class="amount pos">+ ${fmt(gross)}</span></div>
+        <div class="profit-line"><span class="label">Turo Fees (${D.earnings.estimatedTuroFeePercent}%)</span><span class="amount neg">− ${fmt(turoFee)}</span></div>
+        <div class="profit-line"><span class="label">Insurance ($${D.earnings.insuranceMonthly}/mo ÷ ${D.insurance.vehiclesCovered} vehicles)</span><span class="amount neg">− ${fmt(insurance)}</span></div>
+        <div class="profit-line"><span class="label">Charging ($${D.earnings.estimatedChargingPerTrip} × ${trips} trips)</span><span class="amount neg">− ${fmt(charging)}</span></div>
+        <div class="profit-line"><span class="label">Cleaning ($${D.earnings.estimatedCleaningPerTrip} × ${trips} trips)</span><span class="amount neg">− ${fmt(cleaning)}</span></div>
+        <div class="profit-total ${netClass}">
+          <span class="label">Net Profit</span>
+          <span class="amount">${netProfit >= 0 ? '+' : ''}${fmt(netProfit)}</span>
         </div>
+      </div>`;
+
+    // Utilization
+    h += `
+      <div class="card">
+        <div class="card-title">📊 Utilization Analysis</div>
+        <div class="util-ring-wrap">
+          <div class="util-ring">
+            <div class="util-ring-inner">
+              <div class="pct">${D.fleet[0].utilization}%</div>
+              <div class="lbl">Utilization</div>
+            </div>
+          </div>
+          <div class="util-info">
+            <span class="badge">⚠️ Low Utilization</span>
+            <p>${D.fleet[0].utilization}% means roughly <strong>${Math.round(D.fleet[0].utilization / 100 * 30)} booked days</strong> out of 30. Top competitors are hitting <strong>70–85%+</strong>.</p>
+            <div class="potential">📈 At 50% utilization with current pricing, you'd earn ~${fmt0(D.fleet[0].yourMedianPrice * 15)}/mo</div>
+          </div>
+        </div>
+      </div>`;
+
+    // Action Items
+    h += `<div class="card"><div class="card-title">🎯 Action Items</div>`;
+    actions.forEach(a => {
+      h += `
+        <div class="action-item">
+          <span class="badge ${a.priority}">${a.priority}</span>
+          <span class="text">${a.item}</span>
+          <span class="status-dot ${a.status}" title="${a.status}"></span>
+        </div>`;
+    });
+    h += `</div>`;
+
+    // Market Data — Competitor Section
+    const md = D.marketData;
+    h += `
+      <div class="card">
+        <div class="card-title">🏪 Market Data</div>
+        <div class="market-header">Tesla Model 3 in Las Vegas (10mi radius)</div>
+        <div class="market-sub">Source: Turo Insights — ${md.sampleSize} cars, ${md.sampleMonth}</div>
+        <div class="market-summary">
+          <div class="market-stat"><div class="lbl">Weekend Median</div><div class="val">${fmt0(md.areaWeekendMedian)}</div></div>
+          <div class="market-stat"><div class="lbl">Weekday Median</div><div class="val">${fmt0(md.areaWeekdayMedian)}</div></div>
+          <div class="market-stat"><div class="lbl">Your Median</div><div class="val">${fmt0(md.yourMedianPrice)}</div></div>
+          <div class="market-stat"><div class="lbl">Util Range</div><div class="val" style="font-size:0.82rem;">Low ↔ High</div></div>
+        </div>
+        <div class="comp-table-wrap">
+          <table class="comp-table">
+            <thead>
+              <tr>
+                <th>Year</th><th>Trim</th><th>★</th><th>Trips</th><th>Dist</th><th>Util</th><th>Wknd</th><th>Wkdy</th>
+              </tr>
+            </thead>
+            <tbody>`;
+    compRows.forEach(c => {
+      const cls = c.isYou ? 'you-row' : (c.utilization === 'High' ? 'high-util' : '');
+      const uCls = c.utilization.toLowerCase();
+      h += `
+        <tr class="${cls}">
+          <td>${c.year}${c.isYou ? ' <strong style="color:var(--blue)">(YOU)</strong>' : ''}</td>
+          <td>${c.trim}${c.allStar ? '<span class="all-star">★ All-Star</span>' : ''}</td>
+          <td>${c.rating.toFixed(2)}</td>
+          <td>${c.trips}</td>
+          <td>${c.distance}</td>
+          <td><span class="util-tag ${uCls}">${c.utilization}</span></td>
+          <td>${fmt0(c.weekendPrice)}</td>
+          <td>${fmt0(c.weekdayPrice)}</td>
+        </tr>`;
+    });
+    h += `</tbody></table></div>`;
+
+    // Price comparison callout
+    const wkndGap = Math.round((1 - 54 / md.areaWeekendMedian) * 100);
+    h += `
+      <div class="price-callout">
+        <div class="price-comp-box at-market">
+          <div class="title">Weekday</div>
+          <div class="row"><span class="you">You: ${fmt0(53)}</span><span class="area">Area: ${fmt0(md.areaWeekdayMedian)}</span></div>
+          <div class="gap">✅ At market</div>
+        </div>
+        <div class="price-comp-box below">
+          <div class="title">Weekend</div>
+          <div class="row"><span class="you">You: ${fmt0(54)}</span><span class="area">Area: ${fmt0(md.areaWeekendMedian)}</span></div>
+          <div class="gap">🔻 ${Math.abs(wkndGap)}% below market</div>
+        </div>
+      </div>`;
+
+    // Santa Fe alert
+    h += `
+      <div class="santa-fe-alert">
+        <div class="big">🚀 ZERO competitors for Hyundai Santa Fe in Las Vegas</div>
+        <div class="sub">First-mover advantage — <strong>$1,400+/mo</strong> potential revenue while unlisted</div>
       </div>
-      <div class="detail">${v.details || ''}</div>
     </div>`;
-  });
-  h += `</div>`;
 
-  // ===== Calendar Pricing =====
-  if (D.calendar && D.calendar.days) {
-    h += `<div class="sec-title">Calendar Pricing — Next 14 Days</div>`;
-    h += `<div class="glass" style="overflow:hidden">`;
-    h += `<div class="cal-header">
-      <h3>Daily Prices</h3>
-      <div class="avg">Avg <b>${fmt$(D.calendar.averagePrice)}/day</b></div>
-    </div>`;
-    h += `<div class="cal-scroll">`;
+    // Calendar
+    h += `
+      <div class="card">
+        <div class="card-title">📅 Calendar Pricing (avg ${fmt0(D.calendar.averagePrice)}/day)</div>
+        <div class="cal-scroll">`;
     D.calendar.days.forEach(d => {
-      const isToday = d.date === todayStr;
-      h += `<div class="day-card ${d.weekend ? 'weekend' : ''} ${isToday ? 'today' : ''}">
-        <div class="dn">${d.day}</div>
-        <div class="dt">${d.date.slice(5).replace('-', '/')}</div>
-        <div class="pr">$${d.price}</div>
+      const dayNum = d.date.split('-')[2];
+      h += `<div class="cal-day ${d.weekend ? 'weekend' : ''}">
+        <div class="dow">${d.day}</div>
+        <div class="date">${parseInt(dayNum)}</div>
+        <div class="price">${fmt0(d.price)}</div>
       </div>`;
     });
     h += `</div></div>`;
-  }
 
-  // ===== Performance =====
-  if (D.performance) {
-    h += `<div class="sec-title">Performance Metrics</div>`;
-    h += `<div class="perf-card glass">`;
-    const p = D.performance;
-
-    // Helper: determine pass/fail
-    function perfBar(cfg) {
-      const isMax = cfg.goalType === 'max';
-      const pass = isMax ? cfg.value <= cfg.goal : cfg.value >= cfg.goal;
-      const tripsMode = cfg.unit === 'trips';
-      let pct, cls, emoji;
-      if (tripsMode) {
-        pct = Math.min(100, (cfg.value / cfg.goal) * 100);
-        cls = 'track';
-        emoji = '';
-      } else if (isMax) {
-        // For cancellation: 0% is perfect, goal is max allowed
-        pct = cfg.goal > 0 ? Math.max(0, 100 - (cfg.value / cfg.goal) * 100) : 100;
-        // Invert: show remaining as good
-        const ratio = cfg.value / cfg.goal;
-        cls = ratio <= 0.5 ? 'good' : ratio <= 1 ? 'warn' : 'bad';
-        emoji = pass ? '✅' : '⚠️';
-      } else {
-        pct = Math.min(100, (cfg.value / cfg.goal) * 100);
-        cls = pass ? 'good' : 'warn';
-        emoji = pass ? '✅' : '⚠️';
-      }
-      const goalPct = tripsMode ? 100 : (isMax ? 100 : (cfg.value >= cfg.goal ? 100 : (cfg.goal > 0 ? (cfg.goal / Math.max(cfg.value, cfg.goal)) * 100 : 100)));
-
-      const valDisplay = tripsMode ? `${cfg.value}/${cfg.goal}` : `${cfg.value}${cfg.unit || ''}`;
-      const goalDisplay = tripsMode ? `Goal: ${cfg.goal}` : `Goal: ${isMax ? '<' : '>'}${cfg.goal}${cfg.unit || ''}`;
-
-      return `<div class="perf-row">
-        <div class="pi">
-          <div class="pl">${tripsMode ? 'Completed Trips' : ''}</div>
-          <div class="pv">${valDisplay}</div>
-        </div>
-        <div class="perf-bar">
-          <div class="perf-fill ${cls}" style="width:${pct}%"></div>
-        </div>
-        <div class="perf-emoji">${emoji}</div>
-      </div>`;
-    }
-
-    // Cancel rate
-    if (p.cancellationRate) {
-      const c = p.cancellationRate;
-      const pass = c.value <= c.goal;
-      h += `<div class="perf-row">
-        <div class="pi"><div class="pl">Cancellation Rate</div><div class="pv">${c.value}${c.unit}</div></div>
-        <div class="perf-bar"><div class="perf-fill ${pass ? 'good' : 'bad'}" style="width:${c.goal > 0 ? Math.max(2, 100 - (c.value / c.goal) * 100) : 100}%"></div></div>
-        <div class="perf-emoji">${pass ? '✅' : '⚠️'}</div>
-      </div>`;
-    }
-    // 5-star
-    if (p.fiveStarRate) {
-      const c = p.fiveStarRate; const pass = c.value >= c.goal;
-      h += `<div class="perf-row">
-        <div class="pi"><div class="pl">5-Star Rate</div><div class="pv">${c.value}${c.unit}</div></div>
-        <div class="perf-bar"><div class="perf-fill ${pass ? 'good' : 'warn'}" style="width:${Math.min(100, (c.value / c.goal) * 100)}%"></div></div>
-        <div class="perf-emoji">${pass ? '✅' : '⚠️'}</div>
-      </div>`;
-    }
-    // Maintenance
-    if (p.maintenance) {
-      const c = p.maintenance; const pass = c.value >= c.goal;
-      h += `<div class="perf-row">
-        <div class="pi"><div class="pl">Maintenance</div><div class="pv">${c.value}${c.unit}</div></div>
-        <div class="perf-bar"><div class="perf-fill ${pass ? 'good' : 'warn'}" style="width:${Math.min(100, (c.value / c.goal) * 100)}%"></div></div>
-        <div class="perf-emoji">${pass ? '✅' : '⚠️'}</div>
-      </div>`;
-    }
-    // Cleanliness
-    if (p.cleanliness) {
-      const c = p.cleanliness; const pass = c.value >= c.goal;
-      h += `<div class="perf-row">
-        <div class="pi"><div class="pl">Cleanliness</div><div class="pv">${c.value}${c.unit}</div></div>
-        <div class="perf-bar"><div class="perf-fill ${pass ? 'good' : 'warn'}" style="width:${Math.min(100, (c.value / c.goal) * 100)}%"></div></div>
-        <div class="perf-emoji">${pass ? '✅' : '⚠️'}</div>
-      </div>`;
-    }
-    // Completed Trips
-    if (p.completedTrips) {
-      const c = p.completedTrips; const pct = Math.min(100, (c.value / c.goal) * 100);
-      h += `<div class="perf-row">
-        <div class="pi"><div class="pl">Completed Trips</div><div class="pv">${c.value}/${c.goal}</div></div>
-        <div class="perf-bar"><div class="perf-fill track" style="width:${pct}%"></div></div>
-        <div class="perf-emoji">🚗</div>
-      </div>`;
-    }
-    h += `</div>`;
-  }
-
-  // ===== Competitors =====
-  if (D.competitors) {
-    h += `<div class="sec-title">Competitor Pricing</div><div class="grid grid-2">`;
-    const ck = Object.keys(D.competitors);
-    ck.forEach(k => {
-      const c = D.competitors[k];
-      h += `<div class="comp-card glass">`;
-      h += `<div class="ch"><div class="mt">${c.model}</div><div class="mc"><b>${c.count}</b> listings · ${c.market}</div></div>`;
-      if (c.count > 0 && c.listings.length) {
-        h += `<div style="font-size:.75rem;color:var(--text-mute);margin-bottom:8px">Avg <b style="color:var(--text-dim)">$${c.averagePrice}/day</b></div>`;
-        h += `<div class="comp-list">`;
-        c.listings.forEach(l => {
-          h += `<div class="comp-row">
-            <div class="yr">${l.year}</div>
-            <div class="info"><span class="stars">★ ${l.rating}</span> · ${l.trips} trips</div>
-            <div class="price">$${l.price}<span style="font-size:.68rem;color:var(--text-mute);font-weight:400">/day</span></div>
-          </div>`;
-        });
-        h += `</div>`;
-      } else {
-        h += `<div class="comp-empty">🔍 No competing listings found</div>`;
-      }
-      h += `</div>`;
+    // Performance Metrics
+    const perf = D.performance;
+    const perfBars = [
+      { key:'cancellationRate', label:'Cancellation Rate', color:'var(--green)', val: perf.cancellationRate.value, goal: perf.cancellationRate.goal, goalType:'max', unit: perf.cancellationRate.unit, max: 10 },
+      { key:'fiveStarRate', label:'5-Star Rate', color:'var(--green)', val: perf.fiveStarRate.value, goal: perf.fiveStarRate.goal, goalType:'min', unit: perf.fiveStarRate.unit, max: 100 },
+      { key:'maintenance', label:'Maintenance', color:'var(--green)', val: perf.maintenance.value, goal: perf.maintenance.goal, goalType:'min', unit: perf.maintenance.unit, max: 100 },
+      { key:'cleanliness', label:'Cleanliness', color:'var(--green)', val: perf.cleanliness.value, goal: perf.cleanliness.goal, goalType:'min', unit: perf.cleanliness.unit, max: 100 },
+      { key:'completedTrips', label:'Completed Trips', color:'var(--blue)', val: perf.completedTrips.value, goal: perf.completedTrips.goal, goalType:'min', unit: perf.completedTrips.unit, max: perf.completedTrips.goal },
+    ];
+    h += `<div class="card"><div class="card-title">📈 Performance Metrics</div>`;
+    perfBars.forEach(p => {
+      const pct = Math.min(100, (p.val / p.max) * 100);
+      const goalMet = p.goalType === 'max' ? p.val <= p.goal : p.val >= p.goal;
+      const valColor = goalMet ? 'var(--green)' : 'var(--amber)';
+      h += `
+        <div class="perf-row">
+          <div class="perf-header">
+            <span class="name">${p.label}</span>
+            <span class="val" style="color:${valColor}">${p.val}${p.unit} <span style="color:var(--text-dim);font-weight:400;font-size:0.72rem;">/ goal ${p.goalType === 'max' ? '≤' : '≥'}${p.goal}${p.unit}</span></span>
+          </div>
+          <div class="perf-bar"><div class="perf-fill" style="width:${pct}%;background:${p.color};"></div></div>
+        </div>`;
     });
     h += `</div>`;
-  }
 
-  // ===== Market Insights =====
-  if (D.marketInsights) {
-    const m = D.marketInsights;
-    h += `<div class="sec-title">Market Insights</div>`;
-    h += `<div class="insight-card glass">
-      <div class="insight-icon">📈</div>
-      <div class="insight-body">
-        <div class="it">Pricing Opportunity Detected</div>
-        <div class="id">${m.alert}</div>
-        <div class="compare">
-          <span class="compare-pill pill-you">Your avg: ${fmt$(m.yourAverage)}/day</span>
-          <span class="compare-pill pill-mkt">Market avg: ${fmt$(m.marketAverage)}/day</span>
-          <span class="compare-pill pill-gap">Gap: ~${m.underpricingPercent}%</span>
-        </div>
-      </div>
-    </div>`;
-  }
+    // Historical Tracking
+    h += `
+      <div class="card">
+        <div class="card-title">📜 Historical Tracking</div>`;
+    if ((D.history || []).length <= 1) {
+      h += `<div class="history-note">📝 Started tracking <strong>June 16, 2026</strong><br>Earnings data will accumulate here as cron jobs add daily snapshots.</div>`;
+    }
+    h += `<div class="history-chart" id="historyChart"></div>`;
+    // Hidden template for future chart
+    if ((D.history || []).length > 1) {
+      h += `<div id="chartContainer" style="margin-top:12px;">`;
+      const maxEarn = Math.max(...D.history.map(p => p.totalEarned));
+      h += `<div style="display:flex;align-items:flex-end;gap:4px;height:120px;">`;
+      D.history.forEach(p => {
+        const barH = (p.totalEarned / maxEarn) * 100;
+        h += `<div style="flex:1;text-align:center;">
+          <div style="height:${barH}%;background:linear-gradient(180deg,var(--green),rgba(0,230,118,0.2));border-radius:4px 4px 0 0;min-height:4px;"></div>
+          <div style="font-size:0.55rem;color:var(--text-dim);margin-top:4px;">${p.date.slice(5)}</div>
+        </div>`;
+      });
+      h += `</div></div>`;
+    }
+    h += `</div>`;
 
-  // ===== Insurance =====
-  if (D.insurance) {
-    const i = D.insurance;
-    h += `<div class="sec-title">Insurance</div>`;
-    h += `<div class="ins-card glass"><div class="ins-grid">`;
-    h += `<div class="ins-item"><div class="il">Provider</div><div class="iv">${i.provider}</div></div>`;
-    h += `<div class="ins-item"><div class="il">Monthly Cost</div><div class="iv">${fmt$(i.monthlyCost)}</div></div>`;
-    h += `<div class="ins-item"><div class="il">Coverage</div><div class="iv">${i.coverage}</div></div>`;
-    h += `<div class="ins-item"><div class="il">Policy Start</div><div class="iv">${new Date(i.policyStart).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div></div>`;
-    h += `<div class="ins-item"><div class="il">Policy End</div><div class="iv">${new Date(i.policyEnd).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div></div>`;
-    h += `</div></div>`;
-  }
+    // Footer
+    h += `
+      <div class="footer">
+        <div class="ins">🛡️ ${D.insurance.provider} — ${D.insurance.coverage}</div>
+        <div class="ins-detail">${fmt0(D.insurance.monthlyCost)}/mo · ${D.insurance.vehiclesCovered} vehicles · ${D.insurance.policyStart} → ${D.insurance.policyEnd}</div>
+        <div class="updated">Next All-Star assessment: ${D.host.nextAssessment} · Lightning Fleet Dashboard v2</div>
+      </div>`;
 
-  app.innerHTML = h;
+    h += '</div>'; // container
+    document.getElementById('app').innerHTML = h;
+  } catch (err) {
+    document.getElementById('app').innerHTML = `<div class="container"><div class="card" style="text-align:center;padding:40px;"><h2>⚠️ Error</h2><p style="color:var(--text-dim);margin-top:8px;">${err.message}</p></div></div>`;
+  }
 })();
 </script>
 </body>
