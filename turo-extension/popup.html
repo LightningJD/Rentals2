@@ -21,16 +21,31 @@
     .header {
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
       margin-bottom: 14px;
       padding-bottom: 12px;
       border-bottom: 1px solid #21262d;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .header h1 {
       font-size: 15px;
       font-weight: 600;
       color: #00ff88;
+    }
+
+    .version-badge {
+      font-size: 9px;
+      color: #484f58;
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 4px;
+      padding: 2px 6px;
     }
 
     .status-section {
@@ -58,6 +73,8 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      display: flex;
+      align-items: center;
     }
 
     .status-dot {
@@ -66,6 +83,7 @@
       height: 8px;
       border-radius: 50%;
       margin-right: 6px;
+      flex-shrink: 0;
     }
 
     .status-dot.active {
@@ -83,6 +101,16 @@
 
     .status-dot.error {
       background: #ff6b6b;
+    }
+
+    .status-dot.pushing {
+      background: #ffa657;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
     }
 
     .divider {
@@ -114,6 +142,7 @@
       color: #e6edf3;
       font-size: 12px;
       outline: none;
+      transition: border-color 0.15s;
     }
 
     input[type="password"]:focus {
@@ -133,11 +162,16 @@
       font-size: 12px;
       font-weight: 500;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.15s, opacity 0.15s;
     }
 
     .btn:hover {
       background: #30363d;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .btn-primary {
@@ -147,13 +181,18 @@
       font-weight: 600;
     }
 
-    .btn-primary:hover {
+    .btn-primary:hover:not(:disabled) {
       background: #00cc6f;
     }
 
     .btn-row {
       display: flex;
       gap: 6px;
+    }
+
+    .btn-secondary {
+      background: #161b22;
+      border-color: #30363d;
     }
 
     .push-section {
@@ -186,6 +225,12 @@
       border: 1px solid rgba(255, 107, 107, 0.3);
     }
 
+    .toast.info {
+      background: rgba(88, 166, 255, 0.1);
+      color: #58a6ff;
+      border: 1px solid rgba(88, 166, 255, 0.3);
+    }
+
     .footer {
       margin-top: 14px;
       padding-top: 10px;
@@ -198,13 +243,16 @@
 </head>
 <body>
   <div class="header">
-    <h1>⚡ Lightning Fleet Tracker</h1>
+    <div class="header-left">
+      <h1>⚡ Lightning Fleet Tracker</h1>
+    </div>
+    <span class="version-badge">v2</span>
   </div>
 
   <div class="status-section">
     <div class="status-row">
       <span class="status-label">Status</span>
-      <span class="status-value" id="status">
+      <span class="status-value">
         <span class="status-dot idle" id="statusDot"></span>
         <span id="statusText">Idle</span>
       </span>
@@ -221,13 +269,17 @@
 
   <div class="divider"></div>
 
-  <div class="section-title">GitHub Connection</div>
+  <div class="section-title">GitHub Connection → live-captures.json</div>
   <div class="status-row" style="margin-bottom: 8px;">
     <span class="status-label">Push status</span>
     <span class="status-value">
       <span class="status-dot idle" id="githubDot"></span>
       <span id="githubStatus">Not configured</span>
     </span>
+  </div>
+  <div class="status-row" style="margin-bottom: 8px;">
+    <span class="status-label">Last push</span>
+    <span class="status-value" id="lastPushTime">—</span>
   </div>
 
   <div class="input-group">
@@ -236,13 +288,17 @@
 
   <div class="btn-row">
     <button class="btn" id="saveToken" style="flex:1">Save Token</button>
-    <button class="btn-primary btn" id="pushNow" style="flex:1">Push Now</button>
+    <button class="btn btn-primary" id="pushNow" style="flex:1">Push Now</button>
+  </div>
+
+  <div class="btn-row" style="margin-top: 6px;">
+    <button class="btn btn-secondary" id="viewLogs" style="flex:1">View Logs</button>
   </div>
 
   <div class="toast" id="toast"></div>
 
   <div class="footer">
-    Auto-pushes every 5 minutes when captures are active
+    Auto-pushes every 5 min • live-captures.json pipeline
   </div>
 
   <script src="popup.js"></script>

@@ -1,35 +1,83 @@
-// content.js — Monkey-patch fetch & XHR to intercept Turo API responses
+// content.js — Monkey-patch fetch & XHR to intercept ALL Turo API/GraphQL responses
+// v2: Content-based detection (not URL-pattern matching), raw JSON pass-through
 // Core principle: NEVER break Turo's functionality. Only READ responses.
 
 (function () {
   "use strict";
 
   const PREFIX = LIGHTNING_CONFIG.logPrefix;
-  const PATTERNS = LIGHTNING_CONFIG.patterns;
+  const KEYWORDS = LIGHTNING_CONFIG.relevantKeywords;
+  const URL_FILTER = LIGHTNING_CONFIG.urlFilter;
+  const MAX_URL_LOG = 200; // Prevent console spam
+
+  let loggedUrlCount = 0;
 
   // ════════════════════════════════════════════════
-  // Helper: classify a URL and determine capture type
+  // Helper: check if a JSON string contains relevant Turo data
   // ════════════════════════════════════════════════
-  function classifyUrl(url) {
-    if (PATTERNS.listing.test(url)) return "listing";
-    if (PATTERNS.availability.test(url)) return "availability";
-    if (PATTERNS.search.test(url)) return "search";
+  function hasRelevantData(jsonStr) {
+    return KEYWORDS.test(jsonStr);
+  }
+
+  // ════════════════════════════════════════════════
+  // Helper: detect if JSON is a GraphQL response
+  // ════════════════════════════════════════════════
+  function hasGraphQL(json) {
+    if (!json || typeof json !== "object") return false;
+    // GraphQL responses typically have { data: { ... } }
+    if (json.data && typeof json.data === "object") return true;
+    // Or { errors: [...] }
+    if (Array.isArray(json.errors)) return true;
+    return false;
+  }
+
+  // ════════════════════════════════════════════════
+  // Helper: extract GraphQL operation name from request body
+  // ════════════════════════════════════════════════
+  function extractOperationName(body) {
+    if (!body) return null;
+
+    // body can be string, FormData, or object
+    if (typeof body === "string") {
+      const match = body.match(/"operationName"\s*:\s*"([^"]+)"/);
+      if (match) return match[1];
+      // Also try to parse as JSON
+      try {
+        const parsed = JSON.parse(body);
+        if (parsed.operationName) return parsed.operationName;
+      } catch {
+        // not JSON, that's fine
+      }
+    }
+
+    if (body instanceof URLSearchParams) {
+      const op = body.get("operationName");
+      if (op) return op;
+    }
+
+    if (typeof body === "object" && body !== null) {
+      if (body.operationName) return String(body.operationName);
+    }
+
     return null;
   }
 
   // ════════════════════════════════════════════════
-  // Helper: send capture to background script
+  // FIX 4: Send RAW JSON to background — NO field extraction
+  // The cron job handles all field mapping/extraction
   // ════════════════════════════════════════════════
-  function sendCapture(url, type, data) {
+  function sendCapture(url, type, rawJson, operationName) {
     try {
       const payload = {
         type: "API_CAPTURE",
         url: url,
-        captureType: type,
-        data: data,
+        captureType: type, // "graphql" | "api" | "listing" | "availability" | "search"
+        data: rawJson, // RAW JSON — no extraction!
+        operationName: operationName || null,
+        pageUrl: window.location.href,
         timestamp: Date.now(),
       };
-      console.log(`${PREFIX} Capture [${type}]`, url);
+      console.log(`${PREFIX} Capture [${type}]${operationName ? " " + operationName : ""}`, url);
       chrome.runtime.sendMessage(payload).catch((e) => {
         console.warn(`${PREFIX} Failed to send capture to background:`, e);
       });
@@ -39,150 +87,74 @@
   }
 
   // ════════════════════════════════════════════════
-  // Helper: extract relevant fields from listing data
+  // FIX 3: Process ANY JSON response — content-based detection
   // ════════════════════════════════════════════════
-  function extractListingData(raw) {
-    if (!raw || typeof raw !== "object") return raw;
+  function processResponse(url, json, operationName, requestBody) {
+    if (!json) return;
 
-    try {
-      // Turo listing responses vary in shape; grab what we can find
-      const source = raw.listing || raw.result || raw.data || raw;
-      return {
-        vehicle: {
-          make: source.vehicle?.make || source.make || undefined,
-          model: source.vehicle?.model || source.model || undefined,
-          year: source.vehicle?.year || source.year || undefined,
-          trim: source.vehicle?.trim || source.trim || undefined,
-        },
-        price: source.price || source.dailyPrice || source.rate?.amount || undefined,
-        rating: source.rating || source.ratingAverage || undefined,
-        reviewsCount: source.reviewCount || source.numberOfReviews || undefined,
-        tripsCount: source.tripsCount || undefined,
-        delivery: source.deliveryAndReturn?.deliveryEnabled ?? source.isDeliveryAvailable ?? undefined,
-        turoGo: source.turoGo ?? undefined,
-        location: source.location || source.address || undefined,
-        photos: (source.photos || source.images || []).map((p) => ({
-          url: p.url || p.imageUrl || p.resizableUrl || p,
-          type: p.type || undefined,
-        })),
-        host: {
-          id: source.owner?.id || source.host?.id || undefined,
-          name: source.owner?.name || source.host?.name || undefined,
-          rating: source.owner?.rating || source.host?.rating || undefined,
-        },
-        rawType: raw.listing ? "root.listing" : raw.result ? "root.result" : "root",
-      };
-    } catch (e) {
-      console.warn(`${PREFIX} extractListingData error:`, e);
-      return raw;
-    }
-  }
+    const jsonStr = JSON.stringify(json);
 
-  // ════════════════════════════════════════════════
-  // Helper: extract availability/calendar data
-  // ════════════════════════════════════════════════
-  function extractAvailabilityData(raw) {
-    if (!raw || typeof raw !== "object") return raw;
+    // Check if response contains relevant Turo data
+    if (!hasRelevantData(jsonStr)) return;
 
-    try {
-      const bookings = raw.calendar?.bookedDays || raw.bookedDays || raw.unavailableDays || [];
-      const available = raw.calendar?.availableDays || raw.availableDays || [];
-
-      return {
-        bookedDates: Array.isArray(bookings)
-          ? bookings.map((b) => (typeof b === "string" ? b : b.date || b.startDate))
-          : [],
-        availableDates: Array.isArray(available)
-          ? available.map((a) => (typeof a === "string" ? a : a.date || a.startDate))
-          : [],
-        raw: raw,
-      };
-    } catch (e) {
-      return raw;
-    }
-  }
-
-  // ════════════════════════════════════════════════
-  // Helper: extract search results (list of cars)
-  // ════════════════════════════════════════════════
-  function extractSearchData(raw) {
-    if (!raw || typeof raw !== "object") return raw;
-
-    try {
-      const list =
-        raw.listings || raw.results || raw.data?.listings || raw.data || [];
-
-      if (!Array.isArray(list)) return raw;
-
-      const cars = list.map((item) => ({
-        id: item.id || undefined,
-        make: item.vehicle?.make || item.make || undefined,
-        model: item.vehicle?.model || item.model || undefined,
-        year: item.vehicle?.year || item.year || undefined,
-        price: item.price || item.dailyPrice || item.rate?.amount || undefined,
-        rating: item.rating || item.ratingAverage || undefined,
-        location: item.location || item.address || undefined,
-        distance: item.distance || undefined,
-      }));
-
-      return {
-        totalResults: raw.totalCount || raw.total || cars.length,
-        cars: cars,
-      };
-    } catch (e) {
-      return raw;
-    }
-  }
-
-  // ════════════════════════════════════════════════
-  // Helper: process parsed JSON response
-  // ════════════════════════════════════════════════
-  function processResponse(url, json) {
-    const captureType = classifyUrl(url);
-    if (!captureType) return;
-
-    let extracted;
-    switch (captureType) {
-      case "listing":
-        extracted = extractListingData(json);
-        break;
-      case "availability":
-        extracted = extractAvailabilityData(json);
-        break;
-      case "search":
-        extracted = extractSearchData(json);
-        break;
-      default:
-        extracted = json;
+    // Extract operation name from request body if not already found
+    if (!operationName && requestBody) {
+      operationName = extractOperationName(requestBody);
     }
 
-    sendCapture(url, captureType, extracted);
+    // Classify type
+    let type;
+    if (operationName || hasGraphQL(json)) {
+      type = "graphql";
+    } else if (/listing/i.test(url)) {
+      type = "listing";
+    } else if (/availability|calendar/i.test(url)) {
+      type = "availability";
+    } else if (/search/i.test(url)) {
+      type = "search";
+    } else {
+      type = "api";
+    }
+
+    // FIX 4: Send RAW JSON — let the cron job handle extraction
+    sendCapture(url, type, json, operationName);
   }
 
   // ════════════════════════════════════════════════
   // ══ FETCH MONKEY-PATCH ══════════════════════════
+  // FIX 3: Intercept ALL responses, not just pattern-matched URLs
   // ════════════════════════════════════════════════
   const originalFetch = window.fetch;
 
   window.fetch = function (...args) {
     const url = typeof args[0] === "string" ? args[0] : args[0]?.url || "";
+    const requestBody = args[1]?.body;
 
-    // Log ALL intercepted URLs
-    console.log(`${PREFIX} fetch →`, url);
+    // Log ALL intercepted URLs (rate-limited to prevent spam)
+    if (loggedUrlCount < MAX_URL_LOG) {
+      console.log(`${PREFIX} fetch →`, url);
+      loggedUrlCount++;
+    }
+
+    // Extract GraphQL operation name from request body
+    const operationName = extractOperationName(requestBody);
 
     // Call original fetch normally
     const fetchPromise = originalFetch.apply(this, args);
 
-    // Only intercept if it's a Turo API call we care about
-    if (url && classifyUrl(url)) {
+    // FIX 3: Intercept ALL responses from Turo domains OR any JSON response
+    if (url && URL_FILTER.test(url)) {
       fetchPromise
         .then((response) => {
           // Clone the response so we don't consume the original stream
           const cloned = response.clone();
+
+          // Try to parse as JSON
           cloned
             .json()
             .then((json) => {
-              processResponse(url, json);
+              // Content-based detection — check response CONTENT, not just URL
+              processResponse(url, json, operationName, requestBody);
             })
             .catch(() => {
               // Not JSON or parse error — silently skip
@@ -193,7 +165,7 @@
         });
     }
 
-    // Return the ORIGINAL promise (not our chained one)
+    // ALWAYS return the ORIGINAL promise (not our chained one)
     return fetchPromise;
   };
 
@@ -204,32 +176,44 @@
   const originalSend = XMLHttpRequest.prototype.send;
 
   XMLHttpRequest.prototype.open = function (method, url, ...rest) {
-    // Store the URL on the XHR instance for later use
+    // Store the URL and method on the XHR instance for later use
     this.__lightningUrl = url || "";
+    this.__lightningMethod = method || "GET";
     return originalOpen.call(this, method, url, ...rest);
   };
 
   XMLHttpRequest.prototype.send = function (body) {
     const url = this.__lightningUrl || "";
 
-    // Log ALL intercepted URLs
-    console.log(`${PREFIX} XHR →`, url);
+    // Log ALL intercepted URLs (rate-limited)
+    if (loggedUrlCount < MAX_URL_LOG) {
+      console.log(`${PREFIX} XHR →`, url);
+      loggedUrlCount++;
+    }
 
-    if (url && classifyUrl(url)) {
+    // Extract operation name from request body
+    const operationName = extractOperationName(body);
+
+    if (url && URL_FILTER.test(url)) {
       // Listen for the response
       this.addEventListener(
         "load",
         function () {
           try {
             const contentType = this.getResponseHeader("content-type") || "";
-            if (contentType.includes("application/json") || contentType.includes("text/plain")) {
+            if (
+              contentType.includes("application/json") ||
+              contentType.includes("text/plain") ||
+              contentType.includes("application/graphql")
+            ) {
               let json;
               try {
                 json = JSON.parse(this.responseText);
               } catch {
                 return; // Not valid JSON — skip
               }
-              processResponse(url, json);
+              // Content-based detection
+              processResponse(url, json, operationName, body);
             }
           } catch (e) {
             console.warn(`${PREFIX} XHR processing error:`, e);
@@ -243,5 +227,5 @@
     return originalSend.call(this, body);
   };
 
-  console.log(`${PREFIX} Content script loaded — fetch/XHR interception active`);
+  console.log(`${PREFIX} Content script v2 loaded — fetch/XHR interception active (content-based detection)`);
 })();
