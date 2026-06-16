@@ -227,6 +227,23 @@ body {
 .util-tag.high { color: var(--green); }
 .util-tag.medium { color: var(--amber); }
 .util-tag.low { color: var(--text-dim); }
+.util-tag { position: relative; cursor: help; }
+.util-tag:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.9);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.55rem;
+  white-space: nowrap;
+  margin-bottom: 4px;
+  z-index: 100;
+  pointer-events: none;
+}
 
 /* Price comparison callout */
 .price-callout { display: flex; gap: 8px; margin-top: 12px; }
@@ -408,6 +425,7 @@ body {
         <div class="card-title">🏪 Market Data</div>
         <div class="market-header">Tesla Model 3 in Las Vegas (10mi radius)</div>
         <div class="market-sub">Source: Turo Insights — ${md.sampleSize} cars, ${md.sampleMonth}</div>
+        <div class="market-sub" style="font-size:0.58rem;color:var(--text-mute);margin-top:2px">Utilization ranges (estimated): Low <30% · Medium 30-50% · High 50%+. Turo does not publish exact thresholds.</div>
         <div class="market-summary">
           <div class="market-stat"><div class="lbl">Weekend Median</div><div class="val">${fmt0(md.areaWeekendMedian)}</div></div>
           <div class="market-stat"><div class="lbl">Weekday Median</div><div class="val">${fmt0(md.areaWeekdayMedian)}</div></div>
@@ -432,7 +450,7 @@ body {
           <td>${c.rating.toFixed(2)}</td>
           <td>${c.trips}</td>
           <td>${c.distance}</td>
-          <td><span class="util-tag ${uCls}">${c.utilization}</span></td>
+          <td><span class="util-tag ${uCls}" data-tooltip="${c.utilization === 'High' ? 'Est. 50%+ (~15+ days/mo)' : c.utilization === 'Medium' ? 'Est. 30-50% (~9-15 days/mo)' : 'Est. <30% (~<9 days/mo)'} • Estimated range">${c.utilization}</span></td>
           <td>${fmt0(c.weekendPrice)}</td>
           <td>${fmt0(c.weekdayPrice)}</td>
         </tr>`;
