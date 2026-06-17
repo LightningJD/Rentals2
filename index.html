@@ -227,6 +227,36 @@ body {
 .market-stat .lbl { font-size: 0.62rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.3px; }
 .market-stat .val { font-size: 1.05rem; font-weight: 700; color: var(--text-bright); margin-top: 2px; }
 
+/* Live competitor cards */
+.live-comp-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 10px; }
+@media(min-width:640px) { .live-comp-grid { grid-template-columns: 1fr 1fr; } }
+.live-comp-card {
+  background: var(--glass-2); border: 1px solid var(--glass-border); border-radius: 10px; padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.live-comp-card .lc-header { display: flex; justify-content: space-between; align-items: center; }
+.live-comp-card .lc-name { font-size: 0.78rem; font-weight: 600; color: var(--text-bright); }
+.live-comp-card .lc-price { font-size: 0.82rem; font-weight: 700; color: var(--green); }
+.live-comp-card .lc-stats { display: flex; gap: 10px; font-size: 0.66rem; color: var(--text-dim); flex-wrap: wrap; }
+.live-comp-card .lc-stat { display: flex; align-items: center; gap: 2px; }
+.live-comp-card .lc-util-bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.08); overflow: hidden; margin-top: 4px; }
+.live-comp-card .lc-util-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+.live-comp-card .lc-util-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.62rem; color: var(--text-dim); }
+.live-comp-card .lc-badge { font-size: 0.55rem; padding: 1px 5px; border-radius: 8px; font-weight: 600; }
+.live-comp-card .lc-badge.allstar { background: var(--purple-bg); color: var(--purple); }
+.live-comp-card .lc-badge.turogo { background: var(--blue-bg); color: var(--blue); }
+.live-comp-card .lc-host { font-size: 0.6rem; color: var(--text-mute); margin-top: 2px; }
+.live-comp-card .lc-link { font-size: 0.58rem; color: var(--text-mute); text-decoration: none; }
+.live-comp-card .lc-link:hover { color: var(--blue); }
+
+/* Live competitor section */
+.live-comp-section { margin-top: 14px; }
+.live-comp-section .lc-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-dim); margin-bottom: 4px; }
+.live-comp-section .lc-sub { font-size: 0.66rem; color: var(--text-mute); margin-bottom: 8px; }
+.live-comp-summary { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.live-comp-summary .lc-sum-item { font-size: 0.7rem; color: var(--text-dim); }
+.live-comp-summary .lc-sum-item strong { color: var(--text-bright); }
+
 /* Competitor table */
 .comp-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; }
 .comp-table { width: 100%; border-collapse: collapse; font-size: 0.74rem; min-width: 500px; }
@@ -566,6 +596,68 @@ body {
         </div>`;
     }
 
+    // ---- Live Competitor Cards (scraped data with 30-day utilization) ----
+    const lc = D.liveCompetitors || {};
+    const teslaComps = lc.tesla_model_3?.competitors || [];
+    const santaFeComps = (D.santaFeMarket?.competitors) ? D.santaFeMarket.competitors : [];
+    
+    function renderLiveComps(comps, label) {
+      if (!comps || comps.length === 0) return '';
+      const utilValues = comps.filter(c => c.calendarUtilization).map(c => c.calendarUtilization.currentMonth?.utilization ?? 0);
+      const avgUtil = utilValues.length > 0 ? (utilValues.reduce((a,b) => a+b, 0) / utilValues.length).toFixed(1) : '—';
+      const avgPrice = comps.length > 0 ? Math.round(comps.reduce((a,c) => a + (c.currentPrice || 0), 0) / comps.length) : 0;
+      const avgTrips = comps.length > 0 ? Math.round(comps.reduce((a,c) => a + (c.tripCount || 0), 0) / comps.length) : 0;
+      
+      let html = `<div class="live-comp-section">`;
+      html += `<div class="lc-title">🔴 Live Competitor Tracker — ${label}</div>`;
+      html += `<div class="lc-sub">Real-time scrape · 30-day utilization · Updated ${lc.tesla_model_3?.lastScraped || updatedStr}</div>`;
+      html += `<div class="live-comp-summary">`;
+      html += `<div class="lc-sum-item"><strong>${comps.length}</strong> competitors</div>`;
+      html += `<div class="lc-sum-item">Avg utilization: <strong style="color:var(--green)">${avgUtil}%</strong></div>`;
+      html += `<div class="lc-sum-item">Avg price: <strong>$${avgPrice}/day</strong></div>`;
+      html += `<div class="lc-sum-item">Avg trips: <strong>${avgTrips}</strong></div>`;
+      html += `</div>`;
+      html += `<div class="live-comp-grid">`;
+      
+      comps.forEach(c => {
+        const util = c.calendarUtilization?.currentMonth;
+        const utilPct = util?.utilization ?? 0;
+        const utilColor = utilPct >= 50 ? 'var(--green)' : utilPct >= 30 ? 'var(--amber)' : 'var(--red)';
+        const ratingStr = c.rating ? `★ ${c.rating}` : '';
+        const badges = [];
+        if (c.allStar) badges.push('<span class="lc-badge allstar">All-Star</span>');
+        if (c.turoGo) badges.push('<span class="lc-badge turogo">Turo Go</span>');
+        const listingId = c.listingUrl?.split('/').pop() || '';
+        
+        html += `<div class="live-comp-card">`;
+        html += `<div class="lc-header">`;
+        html += `<div class="lc-name">${c.year || ''} ${label.split(' ')[0]} ${c.trim || ''}</div>`;
+        html += `<div class="lc-price">$${c.currentPrice || '?'}/day</div>`;
+        html += `</div>`;
+        html += `<div class="lc-stats">`;
+        html += `<span class="lc-stat">${ratingStr}</span>`;
+        html += `<span class="lc-stat">${c.tripCount || 0} trips</span>`;
+        html += `<span class="lc-stat">${c.reviewCount || 0} reviews</span>`;
+        html += `<span class="lc-stat">${(c.hostName || '').substring(0,20)}</span>`;
+        html += `</div>`;
+        if (badges.length) html += `<div>${badges.join('')}</div>`;
+        if (util) {
+          html += `<div class="lc-util-bar"><div class="lc-util-fill" style="width:${Math.min(100,utilPct)}%;background:${utilColor};"></div></div>`;
+          html += `<div class="lc-util-row"><span>${util.month}: ${util.bookedDays}/${util.totalDays} days booked</span><span style="color:${utilColor};font-weight:600;">${utilPct}%</span></div>`;
+        }
+        html += `</div>`;
+      });
+      
+      html += `</div></div>`;
+      return html;
+    }
+    
+    const liveTeslaHTML = renderLiveComps(teslaComps, 'Tesla Model 3');
+    const liveSantaFeHTML = renderLiveComps(santaFeComps, 'Hyundai Santa Fe');
+    
+    if (liveTeslaHTML) h += liveTeslaHTML;
+    if (liveSantaFeHTML) h += liveSantaFeHTML;
+
     // Price comparison callout (v4 labels: "Your listing" vs "Area booked")
     h += `
       <div class="price-callout">
@@ -668,7 +760,7 @@ body {
       <div class="footer">
         <div class="ins">🛡️ Insurance — ${fmt0(costs.insuranceMonthly)}/mo · ${costs.vehiclesCovered} vehicles covered</div>
         <div class="ins-detail">Policy: ${costs.policyStart} → ${costs.policyEnd}</div>
-        <div class="updated">Next All-Star assessment: ${D.host.nextAssessment} · Lightning Fleet Dashboard v4</div>
+        <div class="updated">Next All-Star assessment: ${D.host.nextAssessment} · Lightning Fleet Dashboard v5</div>
       </div>`;
 
     h += '</div>'; // container
