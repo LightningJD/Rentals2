@@ -1,0 +1,16 @@
+{
+  "name": "lightning-fleet-market-intel",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Static fleet dashboard plus market intelligence scripts for rental/Turo operations.",
+  "scripts": {
+    "serve": "python3 -m http.server 5173",
+    "validate": "node scripts/validate-data.mjs",
+    "analyze": "node scripts/pricing-engine.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {}
+}
