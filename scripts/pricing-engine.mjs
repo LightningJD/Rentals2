@@ -118,27 +118,30 @@ function analyzeMarketData() {
   };
 }
 
+function describeGap({ label, gap, suggestedPrice }) {
+  if (gap === null) {
+    return `${label} market comparison unavailable — collect/update competitor median data before treating this as safe pricing guidance.`;
+  }
+
+  if (gap > 5) {
+    return `${label} listing price is about ${gap}% below market; test ${currency.format(suggestedPrice)}.`;
+  }
+
+  if (gap < -5) {
+    return `${label} listing price is above market; hold only if bookings stay strong.`;
+  }
+
+  return `${label} listing price is close to market.`;
+}
+
 function buildPricingSummary({ weekdayGap, weekendGap, suggestedWeekday, suggestedWeekend, currentWeekday, currentWeekend, eventMultiplier }) {
   const notes = [];
   if (eventMultiplier > 1) {
     notes.push(`Upcoming demand event detected. Pricing multiplier applied: ${eventMultiplier}x.`);
   }
 
-  if (weekdayGap !== null && weekdayGap > 5) {
-    notes.push(`Weekday listing price is about ${weekdayGap}% below market; test ${currency.format(suggestedWeekday)}.`);
-  } else if (weekdayGap !== null && weekdayGap < -5) {
-    notes.push('Weekday listing price is above market; hold only if bookings stay strong.');
-  } else {
-    notes.push('Weekday listing price is close to market.');
-  }
-
-  if (weekendGap !== null && weekendGap > 5) {
-    notes.push(`Weekend listing price is about ${weekendGap}% below market; test ${currency.format(suggestedWeekend)}.`);
-  } else if (weekendGap !== null && weekendGap < -5) {
-    notes.push('Weekend listing price is above market; watch conversion and lead time.');
-  } else {
-    notes.push('Weekend listing price is close to market.');
-  }
+  notes.push(describeGap({ label: 'Weekday', gap: weekdayGap, suggestedPrice: suggestedWeekday }));
+  notes.push(describeGap({ label: 'Weekend', gap: weekendGap, suggestedPrice: suggestedWeekend }));
 
   if (suggestedWeekday && suggestedWeekend && (suggestedWeekday !== currentWeekday || suggestedWeekend !== currentWeekend)) {
     notes.push(`Recommended test range: ${currency.format(suggestedWeekday)} weekdays and ${currency.format(suggestedWeekend)} weekends.`);
@@ -228,6 +231,16 @@ function buildActionPlan(marketAnalysis, liveAnalysis, profitAnalysis, eventAnal
       priority: 'medium',
       action: `Test weekday Tesla Model 3 price at ${currency.format(rec.suggestedWeekday)}.`,
       reason: `Current weekday price ${currency.format(marketAnalysis.current.weekday)} vs market median ${currency.format(marketAnalysis.market.weekdayMedian)}.`
+    });
+  }
+
+  const missingWeekdayMarket = marketAnalysis.gaps.weekdayGapPercent === null;
+  const missingWeekendMarket = marketAnalysis.gaps.weekendGapPercent === null;
+  if (missingWeekdayMarket || missingWeekendMarket) {
+    actions.push({
+      priority: 'high',
+      action: 'Update competitor market data before relying on pricing recommendations.',
+      reason: 'One or more market medians are missing, so the engine cannot safely compare your listing to the market.'
     });
   }
 
