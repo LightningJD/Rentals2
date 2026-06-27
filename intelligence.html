@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lightning Market Intelligence</title>
+  <style>
+    :root {
+      --bg: #070b14;
+      --panel: rgba(255,255,255,0.06);
+      --panel-2: rgba(255,255,255,0.09);
+      --border: rgba(255,255,255,0.14);
+      --text: #edf3ff;
+      --muted: #8c98ad;
+      --green: #00e676;
+      --red: #ff5252;
+      --amber: #ffb74d;
+      --blue: #5c9dff;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top left, rgba(92,157,255,0.18), transparent 32rem), linear-gradient(135deg, #070b14, #111827);
+    }
+    a { color: var(--blue); text-decoration: none; }
+    .wrap { width: min(1080px, 100%); margin: 0 auto; padding: 16px; }
+    .hero, .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 14px 34px rgba(0,0,0,0.25);
+    }
+    .hero { padding: 20px; margin-bottom: 14px; }
+    .hero-top { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap; }
+    h1 { margin:0; font-size:1.55rem; letter-spacing:-0.5px; }
+    .sub { margin-top:6px; color:var(--muted); font-size:0.88rem; }
+    .pill { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border:1px solid var(--border); border-radius:999px; background:var(--panel-2); font-size:0.76rem; color:var(--muted); }
+    .grid { display:grid; gap:12px; }
+    .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-2 { grid-template-columns: 1fr; }
+    @media (min-width: 760px) { .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } .grid-2 { grid-template-columns: 1fr 1fr; } }
+    .card { padding: 16px; margin-bottom: 12px; }
+    .title { color: var(--muted); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.6px; font-weight:800; margin-bottom:10px; }
+    .metric { background: var(--panel-2); border:1px solid var(--border); border-radius: 13px; padding: 14px; }
+    .metric .label { color: var(--muted); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.4px; }
+    .metric .value { font-size:1.45rem; font-weight:850; margin-top:4px; }
+    .green { color: var(--green); } .red { color: var(--red); } .amber { color: var(--amber); } .blue { color: var(--blue); }
+    .list { display:flex; flex-direction:column; gap:8px; }
+    .item { background:var(--panel-2); border:1px solid var(--border); border-radius:12px; padding:12px; }
+    .item-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+    .item-title { font-weight:750; line-height:1.35; }
+    .item-body { margin-top:5px; color:var(--muted); font-size:0.82rem; line-height:1.45; }
+    .badge { flex-shrink:0; padding:3px 8px; border-radius:999px; font-size:0.66rem; text-transform:uppercase; font-weight:850; }
+    .badge.high { background:rgba(255,82,82,0.12); color:var(--red); }
+    .badge.medium { background:rgba(255,183,77,0.13); color:var(--amber); }
+    .badge.low { background:rgba(92,157,255,0.13); color:var(--blue); }
+    .footer { color:var(--muted); font-size:0.74rem; text-align:center; padding:20px 8px 10px; }
+    .error { color: var(--red); padding: 20px; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <div class="hero-top">
+        <div>
+          <h1>⚡ Lightning Market Intelligence</h1>
+          <div class="sub" id="subtitle">Loading report…</div>
+        </div>
+        <div class="pill">⟳ Refresh target: every 6 hours</div>
+      </div>
+    </section>
+
+    <section class="grid grid-4" id="metrics"></section>
+    <section class="card" id="recommendations"></section>
+    <section class="grid grid-2">
+      <div class="card" id="events"></div>
+      <div class="card" id="profit"></div>
+    </section>
+    <section class="card" id="alerts"></section>
+    <section class="card" id="nextData"></section>
+    <div class="footer"><a href="index.html">Back to fleet dashboard</a></div>
+  </main>
+
+  <script>
+    const money = n => Number.isFinite(n) ? '$' + Math.round(n).toLocaleString('en-US') : '—';
+    const pct = n => Number.isFinite(n) ? n + '%' : '—';
+    const safe = value => value ?? '—';
+
+    function renderMetric(label, value, cls = '') {
+      return `<div class="metric"><div class="label">${label}</div><div class="value ${cls}">${value}</div></div>`;
+    }
+
+    function renderItems(items) {
+      if (!items || !items.length) return '<div class="item"><div class="item-body">No items right now.</div></div>';
+      return `<div class="list">${items.map(item => `
+        <div class="item">
+          <div class="item-head">
+            <div class="item-title">${item.action || item.title || item.name}</div>
+            <span class="badge ${(item.priority || 'low').toLowerCase()}">${item.priority || 'info'}</span>
+          </div>
+          <div class="item-body">${item.reason || item.body || item.notes || ''}</div>
+        </div>`).join('')}</div>`;
+    }
+
+    async function loadJson(path, fallback = null) {
+      try {
+        const res = await fetch(path, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`${path} returned ${res.status}`);
+        return await res.json();
+      } catch (error) {
+        if (fallback) return fallback;
+        throw error;
+      }
+    }
+
+    async function main() {
+      const [report, data] = await Promise.all([
+        loadJson('intelligence-report.json'),
+        loadJson('data.json', {})
+      ]);
+
+      const generated = new Date(report.generatedAt);
+      document.getElementById('subtitle').textContent = `Generated ${generated.toLocaleString()} · Source updated ${safe(report.sourceLastUpdated)} · ${data.host?.name || 'Fleet'}`;
+
+      const market = report.marketAnalysis || {};
+      const rec = market.recommendations || {};
+      const profit = report.profitAnalysis || {};
+      const event = report.eventAnalysis?.highestDemandEvent;
+
+      document.getElementById('metrics').innerHTML = [
+        renderMetric('Suggested Weekday', money(rec.suggestedWeekday), 'blue'),
+        renderMetric('Suggested Weekend', money(rec.suggestedWeekend), 'green'),
+        renderMetric('Weekend Gap', pct(market.gaps?.weekendGapPercent), market.gaps?.weekendGapPercent > 5 ? 'amber' : 'green'),
+        renderMetric('Net Tracked Profit', money(profit.netProfit), profit.netProfit >= 0 ? 'green' : 'red')
+      ].join('');
+
+      document.getElementById('recommendations').innerHTML = `
+        <div class="title">Pricing Recommendations</div>
+        <div class="list">${(rec.summary || []).map(note => `<div class="item"><div class="item-body">${note}</div></div>`).join('')}</div>
+      `;
+
+      document.getElementById('events').innerHTML = `
+        <div class="title">Event Demand</div>
+        ${event ? `<div class="item"><div class="item-title">${event.name}</div><div class="item-body">Starts in ${event.daysUntil} day(s). Demand score ${event.demandScore}/10. Suggested multiplier ${event.recommendedMultiplier}x.</div></div>` : '<div class="item"><div class="item-body">No major demand events in the next 45 days.</div></div>'}
+      `;
+
+      document.getElementById('profit').innerHTML = `
+        <div class="title">Profit Snapshot</div>
+        <div class="item"><div class="item-title">Gross: ${money(profit.gross)} · Fees: ${money(profit.turoFees)} · Overhead: ${money(profit.overhead)}</div><div class="item-body">${profit.note || ''}</div></div>
+      `;
+
+      document.getElementById('alerts').innerHTML = `<div class="title">Action Alerts</div>${renderItems(report.actionPlan || report.alerts || [])}`;
+      document.getElementById('nextData').innerHTML = `<div class="title">Next Data To Collect</div><div class="list">${(report.nextDataToCollect || []).map(x => `<div class="item"><div class="item-body">${x}</div></div>`).join('')}</div>`;
+    }
+
+    main().catch(error => {
+      document.body.innerHTML = `<div class="error">Dashboard failed to load: ${error.message}</div>`;
+    });
+  </script>
+</body>
+</html>

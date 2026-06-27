@@ -1,0 +1,30 @@
+name: Refresh Market Intelligence
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run full app check and regenerate report
+        run: npm run check
+
+      - name: Commit updated intelligence report
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'Refresh market intelligence report'
+          file_pattern: intelligence-report.json
