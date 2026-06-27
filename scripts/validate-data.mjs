@@ -12,6 +12,14 @@ const REQUIRED_TOP_LEVEL_KEYS = [
   'actionItems'
 ];
 
+const REQUIRED_PERFORMANCE_METRICS = [
+  'cancellationRate',
+  'fiveStarRate',
+  'maintenance',
+  'cleanliness',
+  'completedTrips'
+];
+
 const errors = [];
 const warnings = [];
 
@@ -48,7 +56,15 @@ for (const vehicle of data.fleet || []) {
 assert(isNumber(data.earnings?.totalEarned), 'earnings.totalEarned must be a number');
 assert(isNumber(data.costs?.turoFeePercent), 'costs.turoFeePercent must be a number');
 assert(isNumber(data.costs?.insuranceMonthly), 'costs.insuranceMonthly must be a number');
+assert(isNumber(data.costs?.cleaningMonthlyPerCar), 'costs.cleaningMonthlyPerCar must be a number');
+assert(isNumber(data.costs?.vehiclesCovered), 'costs.vehiclesCovered must be a number');
 assert(Array.isArray(data.calendar?.days), 'calendar.days must be an array');
+
+for (const metric of REQUIRED_PERFORMANCE_METRICS) {
+  assert(isNumber(data.performance?.[metric]?.value), `performance.${metric}.value must be a number`);
+  assert(isNumber(data.performance?.[metric]?.goal), `performance.${metric}.goal must be a number`);
+  assert(typeof data.performance?.[metric]?.unit === 'string', `performance.${metric}.unit must be a string`);
+}
 
 const md = data.marketData || {};
 warn(isNumber(md.areaWeekendMedian), 'marketData.areaWeekendMedian should be numeric when available');
