@@ -1,11 +1,11 @@
 {
-  "lastUpdated": "2026-06-27T13:30:00-07:00",
+  "lastUpdated": "2026-06-27T13:45:00-07:00",
   "policy": {
-    "mode": "semi_automated_public_browser_research",
+    "mode": "semi_automated_public_research_import",
     "notes": [
-      "Only add public listing/search URLs that you are authorized to review.",
+      "Only add public market listing details that you are authorized to review.",
       "Do not add private dashboards, login-only URLs, or endpoints intended for internal app/API use.",
-      "Collector runs slowly and stores only visible market research fields needed for pricing decisions."
+      "Collector stores manually verified market research fields needed for pricing decisions."
     ]
   },
   "segments": [
@@ -14,13 +14,13 @@
       "label": "Tesla Model 3 Las Vegas",
       "vehicleSegment": "ev_sedan",
       "enabled": true,
-      "sourceType": "manual_seeded_public_listing_urls",
-      "urls": [
-        "https://turo.com/us/en/car-rental/united-states/las-vegas-nv/tesla/model-3/3335076",
-        "https://turo.com/us/en/car-rental/united-states/las-vegas-nv/tesla/model-3/2435249",
-        "https://turo.com/us/en/car-rental/united-states/las-vegas-nv/tesla/model-3/1474910",
-        "https://turo.com/us/en/car-rental/united-states/las-vegas-nv/tesla/model-3/3716217",
-        "https://turo.com/us/en/car-rental/united-states/las-vegas-nv/tesla/model-3/2440304"
+      "sourceType": "manual_verified_public_research",
+      "manualListings": [
+        { "title": "2023 Tesla Model 3 Base", "year": 2023, "currentPrice": 47, "tripCount": 98, "reviewCount": 98, "rating": 4.9 },
+        { "title": "2021 Tesla Model 3 Base", "year": 2021, "currentPrice": 65, "tripCount": 153, "reviewCount": 153, "rating": 4.94 },
+        { "title": "2021 Tesla Model 3 Long Range", "year": 2021, "currentPrice": 66, "tripCount": 264, "reviewCount": 264, "rating": 4.93 },
+        { "title": "2026 Tesla Model 3 Base", "year": 2026, "currentPrice": 60, "tripCount": 4, "reviewCount": 4, "rating": 4.75 },
+        { "title": "2023 Tesla Model 3 Base", "year": 2023, "currentPrice": 69, "tripCount": 119, "reviewCount": 119, "rating": 4.87 }
       ]
     },
     {
@@ -28,8 +28,8 @@
       "label": "Hyundai Santa Fe Las Vegas",
       "vehicleSegment": "midsize_suv",
       "enabled": false,
-      "sourceType": "manual_seeded_public_listing_urls",
-      "urls": []
+      "sourceType": "manual_verified_public_research",
+      "manualListings": []
     }
   ]
 }
