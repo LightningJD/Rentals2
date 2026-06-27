@@ -27,11 +27,8 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Validate data
-        run: npm run validate
-
-      - name: Generate intelligence report
-        run: npm run analyze
+      - name: Run full app check and regenerate report
+        run: npm run check
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
