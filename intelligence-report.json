@@ -1,0 +1,124 @@
+{
+  "generatedAt": "2026-06-27T20:10:00.000Z",
+  "sourceLastUpdated": "2026-06-18T06:14:00-07:00",
+  "marketAnalysis": {
+    "segment": "Tesla Model 3 Las Vegas",
+    "sampleMonth": "May 2026",
+    "sampleSize": 10,
+    "caveat": "Booked prices from last month — not current listing prices. Use as trend reference, not for real-time pricing decisions.",
+    "eventMultiplier": 1.25,
+    "current": {
+      "weekday": 55,
+      "weekend": 56,
+      "utilization": 16
+    },
+    "market": {
+      "weekdayMedian": 53,
+      "weekendMedian": 64,
+      "competitorWeekdayMedian": 53,
+      "competitorWeekendMedian": 63
+    },
+    "gaps": {
+      "weekdayGapPercent": -4,
+      "weekendGapPercent": 13
+    },
+    "recommendations": {
+      "suggestedWeekday": 63,
+      "suggestedWeekend": 76,
+      "summary": [
+        "Upcoming demand event detected. Pricing multiplier applied: 1.25x.",
+        "Weekday listing price is close to market.",
+        "Weekend listing price is about 13% below market; test $76.",
+        "Recommended test range: $63 weekdays and $76 weekends."
+      ]
+    }
+  },
+  "liveAnalysis": [
+    {
+      "segment": "tesla_model_3",
+      "lastScraped": "2026-06-17T18:14:00-07:00",
+      "competitorCount": 5,
+      "medianCurrentPrice": 65,
+      "averageCurrentUtilization": 58.7,
+      "topObservedCompetitors": []
+    }
+  ],
+  "profitAnalysis": {
+    "gross": 736.39,
+    "turoFees": 110.46,
+    "overhead": 179,
+    "netProfit": 446.93,
+    "note": "This excludes car payments, depreciation, charging/fuel, repairs, tires, registration, tolls, tickets, and taxes unless added to data.json."
+  },
+  "eventAnalysis": {
+    "market": "Las Vegas, NV",
+    "next45Days": [
+      {
+        "id": "july-4-2026",
+        "name": "Independence Day Weekend",
+        "startsOn": "2026-07-03",
+        "endsOn": "2026-07-06",
+        "demandScore": 8,
+        "recommendedMultiplier": 1.25,
+        "segments": ["ev_sedan", "midsize_suv", "premium", "family"],
+        "notes": "Holiday weekend travel. Raise earlier if calendar tightens.",
+        "daysUntil": 6
+      }
+    ],
+    "highestDemandEvent": {
+      "id": "july-4-2026",
+      "name": "Independence Day Weekend",
+      "startsOn": "2026-07-03",
+      "endsOn": "2026-07-06",
+      "demandScore": 8,
+      "recommendedMultiplier": 1.25,
+      "daysUntil": 6
+    }
+  },
+  "actionPlan": [
+    {
+      "priority": "high",
+      "action": "Raise/test weekend Tesla Model 3 price to $76 for the next 2 weekends.",
+      "reason": "Current weekend price $56 vs market median $64."
+    },
+    {
+      "priority": "medium",
+      "action": "Test weekday Tesla Model 3 price at $63.",
+      "reason": "Current weekday price $55 vs market median $53."
+    },
+    {
+      "priority": "high",
+      "action": "Prepare event pricing for Independence Day Weekend.",
+      "reason": "Independence Day Weekend starts in 6 day(s), demand score 8/10, suggested multiplier 1.25x."
+    },
+    {
+      "priority": "high",
+      "action": "Finish 2022 Hyundai Santa Fe listing.",
+      "reason": "Needs photos & listing completion"
+    }
+  ],
+  "alerts": [
+    {
+      "id": "alert-1",
+      "priority": "high",
+      "title": "Raise/test weekend Tesla Model 3 price to $76 for the next 2 weekends.",
+      "body": "Current weekend price $56 vs market median $64.",
+      "status": "open",
+      "generatedAt": "2026-06-27T20:10:00.000Z"
+    }
+  ],
+  "dashboardStatus": {
+    "refreshCadence": "Every 6 hours via GitHub Actions when workflow is enabled",
+    "dataFreshness": "data.json and events.json are the current source of truth until live/authorized integrations are added",
+    "nextUpgrade": "Connect Supabase and authorized data imports"
+  },
+  "nextDataToCollect": [
+    "Actual booked daily rates by trip",
+    "Lead time from booking date to trip start",
+    "Cancellation/no-show history",
+    "Delivery option and delivery fee per competitor",
+    "Photo quality score per competitor",
+    "Vegas event calendar with demand score",
+    "Car payment, depreciation, charging/fuel, maintenance, tires, registration, and cleaning labor"
+  ]
+}
