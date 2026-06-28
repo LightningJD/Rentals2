@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-27T20:10:00.000Z",
+  "generatedAt": "2026-06-28T04:22:31.847Z",
   "sourceLastUpdated": "2026-06-18T06:14:00-07:00",
   "marketAnalysis": {
     "segment": "Tesla Model 3 Las Vegas",
     "sampleMonth": "May 2026",
     "sampleSize": 10,
-    "caveat": "Booked prices from last month — not current listing prices. Use as trend reference, not for real-time pricing decisions.",
+    "caveat": "Uses latest market snapshot median: $65 from 5 verified entries.",
     "eventMultiplier": 1.25,
     "current": {
       "weekday": 55,
@@ -16,21 +16,44 @@
       "weekdayMedian": 53,
       "weekendMedian": 64,
       "competitorWeekdayMedian": 53,
-      "competitorWeekendMedian": 63
+      "competitorWeekendMedian": 63,
+      "snapshotMedian": 65
     },
     "gaps": {
-      "weekdayGapPercent": -4,
-      "weekendGapPercent": 13
+      "weekdayGapPercent": 15,
+      "weekendGapPercent": 14
     },
     "recommendations": {
       "suggestedWeekday": 63,
       "suggestedWeekend": 76,
       "summary": [
+        "Market snapshot active: 5 entries, median current price $65, age 0h.",
         "Upcoming demand event detected. Pricing multiplier applied: 1.25x.",
         "Weekday listing price is close to market.",
         "Weekend listing price is about 13% below market; test $76.",
         "Recommended test range: $63 weekdays and $76 weekends."
       ]
+    },
+    "snapshot": {
+      "status": "ok",
+      "generatedAt": "2026-06-28T04:22:31.536Z",
+      "ageHours": 0,
+      "segmentId": "tesla_model_3_las_vegas",
+      "segmentLabel": "Tesla Model 3 Las Vegas",
+      "listingCount": 5,
+      "successfulListings": 5,
+      "medianCurrentPrice": 65,
+      "collector": {
+        "mode": "semi_automated_public_research_import",
+        "status": "ok",
+        "startedAt": "2026-06-28T04:22:31.535Z",
+        "finishedAt": "2026-06-28T04:22:31.536Z",
+        "durationSeconds": 0,
+        "totalListings": 5,
+        "successfulListings": 5,
+        "sourceConfigUpdatedAt": "2026-06-27T13:45:00-07:00",
+        "message": "Imported 5/5 manually verified public market listings."
+      }
     }
   },
   "liveAnalysis": [
@@ -40,7 +63,53 @@
       "competitorCount": 5,
       "medianCurrentPrice": 65,
       "averageCurrentUtilization": 58.7,
-      "topObservedCompetitors": []
+      "topObservedCompetitors": [
+        {
+          "year": 2021,
+          "trim": "Long Range",
+          "currentPrice": 66,
+          "tripCount": 264,
+          "rating": 4.93,
+          "hostName": "VADA Automotive",
+          "currentMonthUtilization": 70
+        },
+        {
+          "year": 2023,
+          "trim": "Base",
+          "currentPrice": 69,
+          "tripCount": 119,
+          "rating": 4.87,
+          "hostName": "VADA Automotive",
+          "currentMonthUtilization": 60
+        },
+        {
+          "year": 2023,
+          "trim": "Base",
+          "currentPrice": 47,
+          "tripCount": 98,
+          "rating": 4.9,
+          "hostName": "Nexus Management LLC",
+          "currentMonthUtilization": 56.7
+        },
+        {
+          "year": 2021,
+          "trim": "Base",
+          "currentPrice": 65,
+          "tripCount": 153,
+          "rating": 4.94,
+          "hostName": "VADA Automotive",
+          "currentMonthUtilization": 53.3
+        },
+        {
+          "year": 2026,
+          "trim": "Base",
+          "currentPrice": 60,
+          "tripCount": 4,
+          "rating": 4.75,
+          "hostName": "M",
+          "currentMonthUtilization": 53.3
+        }
+      ]
     }
   ],
   "profitAnalysis": {
@@ -60,9 +129,14 @@
         "endsOn": "2026-07-06",
         "demandScore": 8,
         "recommendedMultiplier": 1.25,
-        "segments": ["ev_sedan", "midsize_suv", "premium", "family"],
+        "segments": [
+          "ev_sedan",
+          "midsize_suv",
+          "premium",
+          "family"
+        ],
         "notes": "Holiday weekend travel. Raise earlier if calendar tightens.",
-        "daysUntil": 6
+        "daysUntil": 5
       }
     ],
     "highestDemandEvent": {
@@ -72,7 +146,14 @@
       "endsOn": "2026-07-06",
       "demandScore": 8,
       "recommendedMultiplier": 1.25,
-      "daysUntil": 6
+      "segments": [
+        "ev_sedan",
+        "midsize_suv",
+        "premium",
+        "family"
+      ],
+      "notes": "Holiday weekend travel. Raise earlier if calendar tightens.",
+      "daysUntil": 5
     }
   },
   "actionPlan": [
@@ -89,7 +170,7 @@
     {
       "priority": "high",
       "action": "Prepare event pricing for Independence Day Weekend.",
-      "reason": "Independence Day Weekend starts in 6 day(s), demand score 8/10, suggested multiplier 1.25x."
+      "reason": "Independence Day Weekend starts in 5 day(s), demand score 8/10, suggested multiplier 1.25x."
     },
     {
       "priority": "high",
@@ -104,13 +185,38 @@
       "title": "Raise/test weekend Tesla Model 3 price to $76 for the next 2 weekends.",
       "body": "Current weekend price $56 vs market median $64.",
       "status": "open",
-      "generatedAt": "2026-06-27T20:10:00.000Z"
+      "generatedAt": "2026-06-28T04:22:31.847Z"
+    },
+    {
+      "id": "alert-2",
+      "priority": "medium",
+      "title": "Test weekday Tesla Model 3 price at $63.",
+      "body": "Current weekday price $55 vs market median $53.",
+      "status": "open",
+      "generatedAt": "2026-06-28T04:22:31.847Z"
+    },
+    {
+      "id": "alert-3",
+      "priority": "high",
+      "title": "Prepare event pricing for Independence Day Weekend.",
+      "body": "Independence Day Weekend starts in 5 day(s), demand score 8/10, suggested multiplier 1.25x.",
+      "status": "open",
+      "generatedAt": "2026-06-28T04:22:31.847Z"
+    },
+    {
+      "id": "alert-4",
+      "priority": "high",
+      "title": "Finish 2022 Hyundai Santa Fe listing.",
+      "body": "Needs photos & listing completion",
+      "status": "open",
+      "generatedAt": "2026-06-28T04:22:31.847Z"
     }
   ],
   "dashboardStatus": {
     "refreshCadence": "Every 6 hours via GitHub Actions when workflow is enabled",
-    "dataFreshness": "data.json and events.json are the current source of truth until live/authorized integrations are added",
-    "nextUpgrade": "Connect Supabase and authorized data imports"
+    "dataFreshness": "data.json, events.json, and market-snapshots.json feed the dashboard report.",
+    "nextUpgrade": "Connect Supabase and authorized data imports",
+    "marketSnapshot": "ok"
   },
   "nextDataToCollect": [
     "Actual booked daily rates by trip",
@@ -120,5 +226,26 @@
     "Photo quality score per competitor",
     "Vegas event calendar with demand score",
     "Car payment, depreciation, charging/fuel, maintenance, tires, registration, and cleaning labor"
-  ]
+  ],
+  "marketSnapshot": {
+    "status": "ok",
+    "generatedAt": "2026-06-28T04:22:31.536Z",
+    "ageHours": 0,
+    "segmentId": "tesla_model_3_las_vegas",
+    "segmentLabel": "Tesla Model 3 Las Vegas",
+    "listingCount": 5,
+    "successfulListings": 5,
+    "medianCurrentPrice": 65,
+    "collector": {
+      "mode": "semi_automated_public_research_import",
+      "status": "ok",
+      "startedAt": "2026-06-28T04:22:31.535Z",
+      "finishedAt": "2026-06-28T04:22:31.536Z",
+      "durationSeconds": 0,
+      "totalListings": 5,
+      "successfulListings": 5,
+      "sourceConfigUpdatedAt": "2026-06-27T13:45:00-07:00",
+      "message": "Imported 5/5 manually verified public market listings."
+    }
+  }
 }
